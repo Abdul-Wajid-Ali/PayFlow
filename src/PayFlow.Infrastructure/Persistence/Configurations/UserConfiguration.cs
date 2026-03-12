@@ -40,8 +40,8 @@ namespace PayFlow.Infrastructure.Persistence.Configurations
                 .IsRequired();
 
             // One user owns exactly one wallet
-            builder.HasOne<Wallet>()
-                .WithOne()
+            builder.HasOne(u => u.Wallet)
+                .WithOne(w => w.User)
                 .HasForeignKey<Wallet>(w => w.UserId)
                 .OnDelete(DeleteBehavior.Restrict); // Never cascade delete financial data
         }

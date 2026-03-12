@@ -4,16 +4,33 @@ namespace PayFlow.Domain.Entities
 {
     public class User
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; private set; }
 
-        public string Email { get; set; }
+        public string Email { get; private set; } = string.Empty;
 
-        public string PasswordHash { get; set; }
+        public string PasswordHash { get; private set; } = string.Empty;
 
-        public string PasswordSalt { get; set; }
+        public UserStatus Status { get; private set; }
 
-        public UserStatus Status { get; set; }
+        public DateTime CreatedAt { get; private set; }
 
-        public DateTime CreatedAt { get; set; }
+        // Navigation property
+        public Wallet? Wallet { get; private set; }
+
+        // Private constructor to enforce use of factory method
+        private User()
+        { }
+
+        public static User Create(string email, string passwordHash)
+        {
+            return new User
+            {
+                Id = Guid.NewGuid(),
+                Email = email.ToLowerInvariant().Trim(),
+                PasswordHash = passwordHash,
+                Status = UserStatus.Active,
+                CreatedAt = DateTime.UtcNow
+            };
+        }
     }
 }

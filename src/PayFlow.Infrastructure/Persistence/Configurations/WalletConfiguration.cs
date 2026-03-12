@@ -29,13 +29,13 @@ namespace PayFlow.Infrastructure.Persistence.Configurations
                 .HasDefaultValue(0.00m);
 
             // Outgoing transactions from this wallet
-            builder.HasMany<Transaction>()
+            builder.HasMany(w => w.OutgoingTransactions)
                 .WithOne(t => t.FromWallet)
                 .HasForeignKey(t => t.FromWalletId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Incoming transactions to this wallet
-            builder.HasMany<Transaction>()
+            builder.HasMany(w => w.IncomingTransactions)
                 .WithOne(t => t.ToWallet)
                 .HasForeignKey(t => t.ToWalletId)
                 .OnDelete(DeleteBehavior.Restrict);
