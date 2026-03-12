@@ -1,17 +1,19 @@
+using PayFlow.API.Extensions;
+
+// Create the application builder and load configuration, logging, and DI container
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// Register application services into the dependency injection container
+builder.Services
+    .AddApiServices()
+    .AddApplicationServices()
+    .AddInfrastructure(builder.Configuration);
 
+// Build the application and finalize the service container
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+// Configure the HTTP request processing pipeline (middleware + endpoints)
+app.UseApiPipeline();
 
-app.UseHttpsRedirection();
-
+// Start the web server and begin handling incoming HTTP requests
 await app.RunAsync();
