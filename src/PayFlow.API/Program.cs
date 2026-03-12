@@ -3,7 +3,7 @@ using PayFlow.API.Extensions;
 // Create the application builder and load configuration, logging, and DI container
 var builder = WebApplication.CreateBuilder(args);
 
-// Register application services into the dependency injection container
+//Register services in the DI container for API, Application, and Infrastructure layers
 builder.Services
     .AddApiServices()
     .AddApplicationServices()

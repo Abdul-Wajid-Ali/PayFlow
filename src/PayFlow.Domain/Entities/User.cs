@@ -10,6 +10,8 @@ namespace PayFlow.Domain.Entities
 
         public string PasswordHash { get; private set; } = string.Empty;
 
+        public string PasswordSalt { get; private set; } = string.Empty;
+
         public UserStatus Status { get; private set; }
 
         public DateTime CreatedAt { get; private set; }
@@ -21,13 +23,14 @@ namespace PayFlow.Domain.Entities
         private User()
         { }
 
-        public static User Create(string email, string passwordHash)
+        public static User Create(string email, string passwordHash, string passwordSalt)
         {
             return new User
             {
                 Id = Guid.NewGuid(),
                 Email = email.ToLowerInvariant().Trim(),
                 PasswordHash = passwordHash,
+                PasswordSalt = passwordSalt,
                 Status = UserStatus.Active,
                 CreatedAt = DateTime.UtcNow
             };
