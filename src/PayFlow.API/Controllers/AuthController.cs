@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Features.Auth.Commands;
 using PayFlow.Application.Common.Features.Auth.DTOs;
 
@@ -9,10 +10,11 @@ namespace PayFlow.API.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly RegisterCommandHandler _registerHandler;
         private readonly IValidator<RegisterCommand> _registerValidator;
+        private readonly ICommandHandler<RegisterCommand, RegisterResponse> _registerHandler;
 
-        public AuthController(RegisterCommandHandler registerHandler, IValidator<RegisterCommand> registerValidator)
+        public AuthController(IValidator<RegisterCommand> registerValidator,
+            ICommandHandler<RegisterCommand, RegisterResponse> registerHandler)
         {
             _registerHandler = registerHandler;
             _registerValidator = registerValidator;

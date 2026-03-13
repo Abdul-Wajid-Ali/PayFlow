@@ -1,10 +1,11 @@
-﻿using PayFlow.Application.Common.Features.Auth.DTOs;
+﻿using PayFlow.Application.Common.CQRS;
+using PayFlow.Application.Common.Features.Auth.DTOs;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Domain.Entities;
 
 namespace PayFlow.Application.Common.Features.Auth.Commands
 {
-    public class RegisterCommandHandler
+    public class RegisterCommandHandler : ICommandHandler<RegisterCommand, RegisterResponse>
     {
         private readonly IUserRepository _userRepository;
         private readonly IWalletRepository _walletRepository;

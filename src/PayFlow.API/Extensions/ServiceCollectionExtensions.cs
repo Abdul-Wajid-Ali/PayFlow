@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Features.Auth.Commands;
+using PayFlow.Application.Common.Features.Auth.DTOs;
 using PayFlow.Application.Common.Features.Auth.Validators;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Infrastructure.Persistence;
@@ -46,8 +48,8 @@ namespace PayFlow.API.Extensions
         // This is where you would add application-level services like MediatR handlers, AutoMapper profiles, etc.
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            // Handlers
-            services.AddScoped<RegisterCommandHandler>();
+            // Command Handlers
+            services.AddScoped<ICommandHandler<RegisterCommand, RegisterResponse>, RegisterCommandHandler>();
 
             // Validators
             services.AddScoped<IValidator<RegisterCommand>, RegisterCommandValidator>();
