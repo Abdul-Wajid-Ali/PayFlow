@@ -18,20 +18,12 @@ namespace PayFlow.API.ExceptionHandlers
 
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            // Check if the exception is of type PayFlowValidationException
-            if (exception is not PayFlowValidationException validationException)
+            //1: Check if the exception is a ValidationException.
+            if (exception is not ValidationException validationException)
                 return false;
 
-            // Log the validation error with details
-            _logger.LogError(exception, "Validation error occurred."
-                , httpContext.Request.Path
-                , validationException.Errors);
-
-            // Set the response status code and content type
-            httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-
-            // Create a ValidationProblemDetails object to represent the validation errors
-            var validationProblemDetails = new ValidationProblemDetails()
+            //2: Create a ValidationProblemDetails instance and populate it with details from the exception.
+            var problemDetails = new ValidationProblemDetails()
             {
                 Type = validationException.GetType().Name,
                 Title = "Validation failed.",
@@ -41,14 +33,23 @@ namespace PayFlow.API.ExceptionHandlers
 
             // Manually copy errors — avoids ModelStateDictionary conversion issue
             foreach (var (key, messages) in validationException.Errors)
-                validationProblemDetails.Errors[key] = messages;
+                problemDetails.Errors[key] = messages;
 
-            // Use the ProblemDetailsService to write the response and return the result
+            //3: Log the exception details using the ILogger.
+            _logger.LogError(exception
+                , problemDetails.Title
+                , problemDetails.Instance
+                , problemDetails.Errors);
+
+            //4: Set the HTTP response status code to 400 Bad Request.
+            httpContext.Response.StatusCode = (int)problemDetails.Status;
+
+            //5: Use the IProblemDetailsService to write the ProblemDetails response back to the client.
             return await _problemDetailsService.TryWriteAsync(new ProblemDetailsContext
             {
                 HttpContext = httpContext,
                 Exception = validationException,
-                ProblemDetails = validationProblemDetails
+                ProblemDetails = problemDetails
             });
         }
     }

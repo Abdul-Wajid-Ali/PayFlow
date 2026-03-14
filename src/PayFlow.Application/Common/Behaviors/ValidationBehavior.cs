@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using PayFlow.Application.Common.CQRS;
-using PayFlow.Application.Common.Exceptions;
+using ValidationException = PayFlow.Application.Common.Exceptions.ValidationException;
 
 namespace PayFlow.Application.Common.Behaviors
 {
@@ -33,9 +33,9 @@ namespace PayFlow.Application.Common.Behaviors
                 .Where(f => f != null)
                 .ToList();
 
-            // If there are any validation failures, throw a PayFlowValidationException with the details
+            // If there are any validation failures, throw a ValidationException with the details
             if (failures.Any())
-                throw new PayFlowValidationException(failures);
+                throw new ValidationException(failures);
 
             return await next();
         }

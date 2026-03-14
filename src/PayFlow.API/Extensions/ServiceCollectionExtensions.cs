@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using PayFlow.API.ExceptionHandlers;
+using PayFlow.Application.Common.Behaviors;
 using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Features.Auth.Commands;
 using PayFlow.Application.Common.Features.Auth.DTOs;
@@ -21,6 +22,7 @@ namespace PayFlow.API.Extensions
         {
             services.AddOpenApi();
             services.AddExceptionHandler<ValidationExceptionHandler>();
+            services.AddExceptionHandler<BusinessRuleExceptionHandler>();
             services.AddProblemDetails();
             services.AddControllers().AddJsonOptions(options =>
              {
@@ -49,7 +51,7 @@ namespace PayFlow.API.Extensions
             return services;
         }
 
-        // This is where you would add application-level services like MediatR handlers, AutoMapper profiles, etc.
+        // This is where you would add application-level services like AutoMapper profiles, etc.
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             // Register the sender that will be used to dispatch commands and queries
@@ -60,6 +62,9 @@ namespace PayFlow.API.Extensions
 
             // Validators
             services.AddScoped<IValidator<RegisterCommand>, RegisterCommandValidator>();
+
+            // Pipeline Behaviors
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             return services;
         }

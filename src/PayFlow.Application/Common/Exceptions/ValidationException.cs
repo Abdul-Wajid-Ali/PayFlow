@@ -2,13 +2,13 @@
 
 namespace PayFlow.Application.Common.Exceptions
 {
-    // Custom exception for handling validation errors in the PayFlow application
-    public class PayFlowValidationException : Exception
+    // Custom exception to represent validation errors
+    public class ValidationException : Exception
     {
         public IReadOnlyDictionary<string, string[]> Errors { get; }
 
-        // Constructor that takes a collection of validation failures and organizes them into a dictionary
-        public PayFlowValidationException(IEnumerable<ValidationFailure> failures)
+        // Constructor that takes a list of validation failures and organizes them into a dictionary
+        public ValidationException(IEnumerable<ValidationFailure> failures)
             : base("One or more validation errors occurred.")
         {
             Errors = failures

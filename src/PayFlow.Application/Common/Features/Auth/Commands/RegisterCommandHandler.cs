@@ -1,4 +1,5 @@
 ﻿using PayFlow.Application.Common.CQRS;
+using PayFlow.Application.Common.Exceptions;
 using PayFlow.Application.Common.Features.Auth.DTOs;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Domain.Entities;
@@ -31,7 +32,7 @@ namespace PayFlow.Application.Common.Features.Auth.Commands
             // 1. Guard — email must be unique
             var existingUser = await _userRepository.ExistsAsync(command.Email);
             if (existingUser)
-                throw new InvalidOperationException($"Email '{command.Email}' is already registered.");
+                throw new BusinessRuleException("Email already exists.", $"A user with email '{command.Email}' already exists.");
 
             //2. Password hashing
             var (passwordHash, passwordSalt) = _passwordHasher.Hash(command.Password);
