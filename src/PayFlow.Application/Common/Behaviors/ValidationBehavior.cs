@@ -19,24 +19,25 @@ namespace PayFlow.Application.Common.Behaviors
             Func<Task<TResponse>> next,
             CancellationToken cancellationToken = default)
         {
-            // If there are no validators, proceed to the next behavior or handler
+            // 1: Skip validation entirely if no validators are registered for this request type
             if (!_validators.Any())
                 return await next();
 
-            // Create a validation context for the request
+            // 2: Build a validation context wrapping the incoming request data
             var context = new ValidationContext<TRequest>(request);
 
-            // Validate the request using all validators and collect any failures
+            // 3: Run every registered validator and flatten all rule failures into one list
             var failures = _validators
                 .Select(v => v.Validate(context))
                 .SelectMany(result => result.Errors)
                 .Where(f => f != null)
                 .ToList();
 
-            // If there are any validation failures, throw a PayFlowValidationException with the details
+            // 4: Abort the pipeline and surface all validation errors if any rule failed
             if (failures.Any())
                 throw new PayFlowValidationException(failures);
 
+            // 5: All rules passed — hand control to the next behavior or the command handler
             return await next();
         }
     }

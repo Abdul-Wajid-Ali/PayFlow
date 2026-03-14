@@ -17,11 +17,14 @@ public class Sender : ISender
         ICommand<TResponse> command,
         CancellationToken cancellationToken = default)
     {
+        // 1: Build the closed generic ICommandHandler type for this specific command
         var handlerType = typeof(ICommandHandler<,>)
             .MakeGenericType(command.GetType(), typeof(TResponse));
 
+        // 2: Resolve the matching command handler from the DI container
         var handler = _serviceProvider.GetRequiredService(handlerType);
 
+        // 3: Run the command through the full behavior pipeline before reaching the handler
         return await ExecutePipeline<TResponse>(
             command,
             handlerType,
@@ -33,11 +36,14 @@ public class Sender : ISender
         IQuery<TResponse> query,
         CancellationToken cancellationToken = default)
     {
+        // 1: Build the closed generic IQueryHandler type for this specific query
         var handlerType = typeof(IQueryHandler<,>)
             .MakeGenericType(query.GetType(), typeof(TResponse));
 
+        // 2: Resolve the matching query handler from the DI container
         var handler = _serviceProvider.GetRequiredService(handlerType);
 
+        // 3: Run the query through the full behavior pipeline before reaching the handler
         return await ExecutePipeline<TResponse>(
             query,
             handlerType,
@@ -51,20 +57,23 @@ public class Sender : ISender
         object handler,
         CancellationToken cancellationToken)
     {
+        // 1: Get the concrete runtime type of the request (e.g. RegisterCommand)
         var requestType = request.GetType();
 
-        // Resolve behaviors for this specific request/response pair
+        // 2: Build the closed generic IPipelineBehavior type for this request/response pair
         var behaviorType = typeof(IPipelineBehavior<,>)
             .MakeGenericType(requestType, typeof(TResponse));
 
+        // 3: Wrap in IEnumerable so DI returns all behaviors registered for this pair
         var behaviorsType = typeof(IEnumerable<>)
             .MakeGenericType(behaviorType);
 
+        // 4: Resolve all matching behaviors from DI (e.g. ValidationBehavior)
         var behaviors = ((IEnumerable<object>)_serviceProvider
             .GetRequiredService(behaviorsType))
             .ToList();
 
-        // Core handler invocation at the end of the pipeline
+        // 5: Define the innermost step — the actual handler invocation via reflection
         Func<Task<TResponse>> pipeline = () =>
         {
             var handleMethod = handlerType.GetMethod("HandleAsync")!;
@@ -72,7 +81,7 @@ public class Sender : ISender
                 .Invoke(handler, new object[] { request, cancellationToken })!;
         };
 
-        // Wrap behaviors in reverse — first registered executes first
+        // 6: Wrap behaviors around the pipeline in reverse so first-registered runs first
         foreach (var behavior in behaviors.AsEnumerable().Reverse())
         {
             var next = pipeline;
@@ -83,6 +92,7 @@ public class Sender : ISender
                 .Invoke(current, new object[] { request, next, cancellationToken })!;
         }
 
+        // 7: Execute the fully composed pipeline from outermost behavior to handler
         return await pipeline();
     }
 }
