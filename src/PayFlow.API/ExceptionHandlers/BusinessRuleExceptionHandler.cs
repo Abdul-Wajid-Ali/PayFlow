@@ -6,10 +6,10 @@ namespace PayFlow.API.ExceptionHandlers
 {
     public class BusinessRuleExceptionHandler : IExceptionHandler
     {
-        private readonly ILogger<ValidationExceptionHandler> _logger;
+        private readonly ILogger<BusinessRuleExceptionHandler> _logger;
         private readonly IProblemDetailsService _problemDetailsService;
 
-        public BusinessRuleExceptionHandler(ILogger<ValidationExceptionHandler> logger
+        public BusinessRuleExceptionHandler(ILogger<BusinessRuleExceptionHandler> logger
             , IProblemDetailsService problemDetailsService)
         {
             _logger = logger;

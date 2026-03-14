@@ -1,8 +1,7 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PayFlow.Application.Common.CQRS;
-using PayFlow.Application.Common.Features.Auth.Commands;
-using PayFlow.Application.Common.Features.Auth.DTOs;
+using PayFlow.Application.Features.Auth.Commands;
+using PayFlow.Application.Features.Auth.DTOs;
 
 namespace PayFlow.API.Controllers
 {
@@ -33,18 +32,13 @@ namespace PayFlow.API.Controllers
         }
 
         [HttpPost("login")]
-        [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> Login([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public Task<IActionResult> Login([FromBody] RegisterRequest request, CancellationToken cancellationToken)
         {
-            // Create the command
-            var command = new RegisterCommand(Email: request.Email, Password: request.Password);
-
-            // Send the command to the handler
-            var response = await _sender.SendAsync(command, cancellationToken);
-
-            return CreatedAtAction(nameof(Register), new { userId = response.UserId }, response);
+            // TODO: Implement LoginCommand and LoginCommandHandler
+            return Task.FromResult<IActionResult>(StatusCode(StatusCodes.Status501NotImplemented));
         }
     }
 }

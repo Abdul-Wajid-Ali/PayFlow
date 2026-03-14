@@ -1,7 +1,7 @@
-﻿using FluentValidation;
-using PayFlow.Application.Common.Features.Auth.Commands;
+using FluentValidation;
+using PayFlow.Application.Features.Auth.Commands;
 
-namespace PayFlow.Application.Common.Features.Auth.Validators
+namespace PayFlow.Application.Features.Auth.Validators
 {
     public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
     {

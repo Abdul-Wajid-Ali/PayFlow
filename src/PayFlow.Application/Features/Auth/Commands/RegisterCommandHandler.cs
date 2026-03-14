@@ -1,10 +1,10 @@
-﻿using PayFlow.Application.Common.CQRS;
+using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Exceptions;
-using PayFlow.Application.Common.Features.Auth.DTOs;
 using PayFlow.Application.Common.Interfaces;
+using PayFlow.Application.Features.Auth.DTOs;
 using PayFlow.Domain.Entities;
 
-namespace PayFlow.Application.Common.Features.Auth.Commands
+namespace PayFlow.Application.Features.Auth.Commands
 {
     public class RegisterCommandHandler : ICommandHandler<RegisterCommand, RegisterResponse>
     {
@@ -12,17 +12,20 @@ namespace PayFlow.Application.Common.Features.Auth.Commands
         private readonly IWalletRepository _walletRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDateTimeProvider _dateTimeProvider;
 
         public RegisterCommandHandler(
             IUserRepository userRepository,
             IWalletRepository walletRepository,
             IUnitOfWork unitOfWork,
-            IPasswordHasher passwordHasher)
+            IPasswordHasher passwordHasher,
+            IDateTimeProvider dateTimeProvider)
         {
             _userRepository = userRepository;
             _walletRepository = walletRepository;
             _unitOfWork = unitOfWork;
             _passwordHasher = passwordHasher;
+            _dateTimeProvider = dateTimeProvider;
         }
 
         public async Task<RegisterResponse> HandleAsync(
@@ -38,7 +41,7 @@ namespace PayFlow.Application.Common.Features.Auth.Commands
             var (passwordHash, passwordSalt) = _passwordHasher.Hash(command.Password);
 
             //3. Create domain objects
-            var newUser = User.Create(command.Email, passwordHash, passwordSalt);
+            var newUser = User.Create(command.Email, passwordHash, passwordSalt, _dateTimeProvider.UtcNow);
             var newWallet = Wallet.Create(newUser.Id);
 
             //4: Persist both in a single transaction

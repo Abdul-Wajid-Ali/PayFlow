@@ -1,4 +1,6 @@
 using PayFlow.API.Extensions;
+using PayFlow.Application;
+using PayFlow.Infrastructure;
 
 // Create the application builder and load configuration, logging, and DI container
 var builder = WebApplication.CreateBuilder(args);
