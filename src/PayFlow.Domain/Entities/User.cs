@@ -23,7 +23,7 @@ namespace PayFlow.Domain.Entities
         private User()
         { }
 
-        public static User Create(string email, string passwordHash, string passwordSalt)
+        public static User Create(string email, string passwordHash, string passwordSalt, DateTime createAt)
         {
             return new User
             {
@@ -32,7 +32,7 @@ namespace PayFlow.Domain.Entities
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt,
                 Status = UserStatus.Active,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = createAt
             };
         }
     }

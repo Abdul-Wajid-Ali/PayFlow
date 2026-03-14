@@ -78,7 +78,7 @@ public class Sender : ISender
         {
             var handleMethod = handlerType.GetMethod("HandleAsync")!;
             return (Task<TResponse>)handleMethod
-                .Invoke(handler, new object[] { request, cancellationToken })!;
+                .Invoke(handler, [request, cancellationToken])!;
         };
 
         // 6: Wrap behaviors around the pipeline in reverse so first-registered runs first
@@ -89,7 +89,7 @@ public class Sender : ISender
             var handleMethod = behaviorType.GetMethod("HandleAsync")!;
 
             pipeline = () => (Task<TResponse>)handleMethod
-                .Invoke(current, new object[] { request, next, cancellationToken })!;
+                .Invoke(current, [request, next, cancellationToken])!;
         }
 
         // 7: Execute the fully composed pipeline from outermost behavior to handler

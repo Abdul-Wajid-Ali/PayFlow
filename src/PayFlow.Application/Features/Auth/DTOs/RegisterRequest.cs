@@ -1,4 +1,4 @@
-﻿namespace PayFlow.Application.Common.Features.Auth.DTOs
+﻿namespace PayFlow.Application.Features.Auth.DTOs
 {
     public record RegisterRequest(string Email, string Password);
 }

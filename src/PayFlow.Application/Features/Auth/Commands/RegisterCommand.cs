@@ -1,7 +1,7 @@
 ﻿using PayFlow.Application.Common.CQRS;
-using PayFlow.Application.Common.Features.Auth.DTOs;
+using PayFlow.Application.Features.Auth.DTOs;
 
-namespace PayFlow.Application.Common.Features.Auth.Commands
+namespace PayFlow.Application.Features.Auth.Commands
 {
     public record RegisterCommand(string Email, string Password)
         : ICommand<RegisterResponse>;

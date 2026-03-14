@@ -1,4 +1,4 @@
-﻿namespace PayFlow.Application.Common.Features.Auth.DTOs
+﻿namespace PayFlow.Application.Features.Auth.DTOs
 {
     public record RegisterResponse(Guid UserId, string Email, Guid WalletId);
 }

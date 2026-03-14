@@ -27,8 +27,12 @@ namespace PayFlow.Application.Common.Behaviors
             var context = new ValidationContext<TRequest>(request);
 
             // 3: Run every registered validator and flatten all rule failures into one list
-            var failures = _validators
-                .Select(v => v.Validate(context))
+            var validationTasks = _validators
+                .Select(v => v.ValidateAsync(context, cancellationToken));
+
+            var validationResults = await Task.WhenAll(validationTasks);
+
+            var failures = validationResults
                 .SelectMany(result => result.Errors)
                 .Where(f => f != null)
                 .ToList();
