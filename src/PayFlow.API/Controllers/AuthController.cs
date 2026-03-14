@@ -32,13 +32,10 @@ namespace PayFlow.API.Controllers
             var validationResult = await _registerValidator.ValidateAsync(command, cancellationToken);
             if (!validationResult.IsValid)
             {
-                var problemDetails = new ValidationProblemDetails(validationResult.ToDictionary())
-                {
-                    Status = StatusCodes.Status400BadRequest,
-                    Title = "Validation failed"
-                };
+                foreach (var error in validationResult.Errors)
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
 
-                return BadRequest(problemDetails);
+                return ValidationProblem(ModelState);
             }
 
             //Handle the command
