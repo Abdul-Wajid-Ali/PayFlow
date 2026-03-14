@@ -12,9 +12,7 @@ namespace PayFlow.API.Controllers
     {
         private readonly ISender _sender;
 
-        public AuthController(IValidator<RegisterCommand> registerValidator,
-            ICommandHandler<RegisterCommand, RegisterResponse> registerHandler,
-            ISender sender)
+        public AuthController(ISender sender)
         {
             _sender = sender;
         }
@@ -24,6 +22,21 @@ namespace PayFlow.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+        {
+            // Create the command
+            var command = new RegisterCommand(Email: request.Email, Password: request.Password);
+
+            // Send the command to the handler
+            var response = await _sender.SendAsync(command, cancellationToken);
+
+            return CreatedAtAction(nameof(Register), new { userId = response.UserId }, response);
+        }
+
+        [HttpPost("login")]
+        [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> Login([FromBody] RegisterRequest request, CancellationToken cancellationToken)
         {
             // Create the command
             var command = new RegisterCommand(Email: request.Email, Password: request.Password);

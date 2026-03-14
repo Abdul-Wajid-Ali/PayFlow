@@ -30,7 +30,7 @@ namespace PayFlow.Application.Common.Features.Auth.Commands
             CancellationToken cancellationToken = default)
         {
             // 1. Guard — email must be unique
-            var existingUser = await _userRepository.ExistsAsync(command.Email);
+            var existingUser = await _userRepository.ExistsAsync(command.Email, cancellationToken);
             if (existingUser)
                 throw new BusinessRuleException("Email already exists.", $"A user with email '{command.Email}' already exists.");
 

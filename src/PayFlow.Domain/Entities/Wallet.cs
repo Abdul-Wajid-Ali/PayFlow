@@ -11,7 +11,7 @@
         public decimal Balance { get; private set; }
 
         // Navigation property to the owning user
-        public User? User { get; set; }
+        public User? User { get; private set; }
 
         //Navigation collections for transactions where this wallet is sender
         public ICollection<Transaction> OutgoingTransactions { get; private set; } = new List<Transaction>();
