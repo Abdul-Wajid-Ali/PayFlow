@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using PayFlow.API.ExceptionHandlers;
 using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Features.Auth.Commands;
 using PayFlow.Application.Common.Features.Auth.DTOs;
@@ -7,6 +8,7 @@ using PayFlow.Application.Common.Features.Auth.Validators;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Infrastructure.Persistence;
 using PayFlow.Infrastructure.Persistence.Repositories;
+using PayFlow.Infrastructure.Pipeline;
 using PayFlow.Infrastructure.Services;
 using System.Text.Json.Serialization;
 
@@ -18,6 +20,8 @@ namespace PayFlow.API.Extensions
         public static IServiceCollection AddApiServices(this IServiceCollection services)
         {
             services.AddOpenApi();
+            services.AddExceptionHandler<ValidationExceptionHandler>();
+            services.AddProblemDetails();
             services.AddControllers().AddJsonOptions(options =>
              {
                  // Serialize enum as string in API responses
@@ -48,6 +52,9 @@ namespace PayFlow.API.Extensions
         // This is where you would add application-level services like MediatR handlers, AutoMapper profiles, etc.
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
+            // Register the sender that will be used to dispatch commands and queries
+            services.AddScoped<ISender, Sender>();
+
             // Command Handlers
             services.AddScoped<ICommandHandler<RegisterCommand, RegisterResponse>, RegisterCommandHandler>();
 

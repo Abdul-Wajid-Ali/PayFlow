@@ -12,6 +12,8 @@
                 app.MapOpenApi();
             }
 
+            app.UseExceptionHandler();
+
             app.UseHttpsRedirection();
 
             app.MapControllers();

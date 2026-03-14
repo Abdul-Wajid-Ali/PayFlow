@@ -10,14 +10,13 @@ namespace PayFlow.API.Controllers
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly IValidator<RegisterCommand> _registerValidator;
-        private readonly ICommandHandler<RegisterCommand, RegisterResponse> _registerHandler;
+        private readonly ISender _sender;
 
         public AuthController(IValidator<RegisterCommand> registerValidator,
-            ICommandHandler<RegisterCommand, RegisterResponse> registerHandler)
+            ICommandHandler<RegisterCommand, RegisterResponse> registerHandler,
+            ISender sender)
         {
-            _registerHandler = registerHandler;
-            _registerValidator = registerValidator;
+            _sender = sender;
         }
 
         [HttpPost("register")]
@@ -26,23 +25,11 @@ namespace PayFlow.API.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
         {
+            // Create the command
             var command = new RegisterCommand(Email: request.Email, Password: request.Password);
 
-            // Validate the command
-            var validationResult = await _registerValidator.ValidateAsync(command, cancellationToken);
-            if (!validationResult.IsValid)
-            {
-                var problemDetails = new ValidationProblemDetails(validationResult.ToDictionary())
-                {
-                    Status = StatusCodes.Status400BadRequest,
-                    Title = "Validation failed"
-                };
-
-                return BadRequest(problemDetails);
-            }
-
-            //Handle the command
-            var response = await _registerHandler.HandleAsync(command, cancellationToken);
+            // Send the command to the handler
+            var response = await _sender.SendAsync(command, cancellationToken);
 
             return CreatedAtAction(nameof(Register), new { userId = response.UserId }, response);
         }
