@@ -10,17 +10,18 @@ namespace PayFlow.Application;
 
 public static class DependencyInjection
 {
+    // Registers application layer services and use-case handlers
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        // Command Handlers
+        // 1: Register command handlers for application use cases
         services.AddScoped<ICommandHandler<RegisterCommand, RegisterResponse>, RegisterCommandHandler>();
         services.AddScoped<ICommandHandler<LoginCommand, LoginResponse>, LoginCommandHandler>();
 
-        // Validators
+        // 2: Register FluentValidation validators for commands
         services.AddScoped<IValidator<RegisterCommand>, RegisterCommandValidator>();
         services.AddScoped<IValidator<LoginCommand>, LoginCommandValidator>();
 
-        // Pipeline Behaviors
+        // 3: Register pipeline behaviors for cross-cutting concerns (validation)
         services.AddScoped<IPipelineBehavior<RegisterCommand, RegisterResponse>, ValidationBehavior<RegisterCommand, RegisterResponse>>();
         services.AddScoped<IPipelineBehavior<LoginCommand, LoginResponse>, ValidationBehavior<LoginCommand, LoginResponse>>();
 

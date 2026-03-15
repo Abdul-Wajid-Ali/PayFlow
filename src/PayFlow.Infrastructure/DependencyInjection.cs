@@ -13,24 +13,28 @@ namespace PayFlow.Infrastructure;
 
 public static class DependencyInjection
 {
+    // Registers infrastructure services and external implementations
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // Register DbContext with SQL Server provider
+        // 1: Register EF Core DbContext with SQL Server
         services.AddDbContext<PayFlowDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-        // Register repositories and unit of work
+        // 2: Register repository implementations and unit of work
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // Register Services
+        // 3: Register infrastructure services (JWT, password hashing, time provider)
         services.AddScoped<IJwtService, JwtService>();
         services.AddSingleton<IPasswordService, PasswordService>();
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
 
-        // Pipeline sender
+        // 4: Register application pipeline sender implementation
         services.AddScoped<ISender, Sender>();
+
+        // 5: Bind JwtSettings configuration for IOptions<JwtSettings>
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
         return services;
     }

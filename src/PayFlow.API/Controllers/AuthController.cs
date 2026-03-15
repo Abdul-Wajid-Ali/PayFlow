@@ -12,9 +12,7 @@ namespace PayFlow.API.Controllers
         private readonly ISender _sender;
 
         public AuthController(ISender sender)
-        {
-            _sender = sender;
-        }
+            => _sender = sender;
 
         [HttpPost("register")]
         [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status201Created)]

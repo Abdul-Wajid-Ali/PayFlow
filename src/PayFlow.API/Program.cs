@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 //Register services in the DI container for API, Application, and Infrastructure layers
 builder.Services
-    .AddApiServices()
+    .AddApiServices(builder.Configuration)
     .AddApplicationServices()
     .AddInfrastructure(builder.Configuration);
 
