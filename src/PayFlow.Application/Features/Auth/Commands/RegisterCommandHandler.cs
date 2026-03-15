@@ -47,7 +47,7 @@ namespace PayFlow.Application.Features.Auth.Commands
 
             //3. Create domain objects
             var newUser = User.Create(command.Email, hashResult.Hash, hashResult.Salt, _dateTimeProvider.UtcNow);
-            var newWallet = Wallet.Create(newUser.Id);
+            var newWallet = PayFlow.Domain.Entities.Wallet.Create(newUser.Id);
 
             //4: Persist both in a single transaction
             await _userRepository.AddAsync(newUser, cancellationToken);

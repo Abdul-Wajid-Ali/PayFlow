@@ -12,9 +12,10 @@ namespace PayFlow.API.Extensions
         // Registers API layer services
         public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
         {
-            // 1: Add API documentation and problem details support
+            // 1: Add API documentation, problem details support and HTTP context accessor
             services.AddOpenApi();
             services.AddProblemDetails();
+            services.AddHttpContextAccessor();
 
             // 2: Register controllers and configure JSON serialization
             services.AddControllers().AddJsonOptions(options =>

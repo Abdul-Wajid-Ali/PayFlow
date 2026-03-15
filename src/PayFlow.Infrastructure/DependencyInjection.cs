@@ -29,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddSingleton<IPasswordService, PasswordService>();
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         // 4: Register application pipeline sender implementation
         services.AddScoped<ISender, Sender>();
