@@ -1,6 +1,6 @@
 ﻿namespace PayFlow.Application.Common.Interfaces
 {
-    public class ICurrentUserService
+    public interface ICurrentUserService
     {
         public Guid UserId { get; }
 
