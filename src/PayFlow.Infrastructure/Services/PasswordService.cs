@@ -1,9 +1,10 @@
 ﻿using PayFlow.Application.Common.Interfaces;
+using PayFlow.Application.Common.Models;
 using System.Security.Cryptography;
 
 namespace PayFlow.Infrastructure.Services
 {
-    public class PasswordHasher : IPasswordHasher
+    public class PasswordService : IPasswordService
     {
         // These constants define the parameters for the hashing algorithm.
         private const int SaltSize = 32;
@@ -14,7 +15,7 @@ namespace PayFlow.Infrastructure.Services
         private static readonly HashAlgorithmName Algorithm = HashAlgorithmName.SHA256;
 
         // Hashes the password using PBKDF2 with a random salt.
-        public (string Hash, string Salt) Hash(string password)
+        public PasswordHashResult Hash(string password)
         {
             var salt = RandomNumberGenerator.GetBytes(SaltSize);
 
@@ -25,10 +26,9 @@ namespace PayFlow.Infrastructure.Services
                 Algorithm,
                 HashSize);
 
-            return (
-                Hash: Convert.ToBase64String(hash),
-                Salt: Convert.ToBase64String(salt)
-            );
+            return new PasswordHashResult(
+                 Hash: Convert.ToBase64String(hash),
+                 Salt: Convert.ToBase64String(salt));
         }
 
         // Verifies the password by hashing it with the provided salt and comparing it to the stored hash.

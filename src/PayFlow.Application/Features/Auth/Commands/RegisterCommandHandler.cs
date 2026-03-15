@@ -3,6 +3,7 @@ using PayFlow.Application.Common.Exceptions;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Features.Auth.DTOs;
 using PayFlow.Domain.Entities;
+using System.Net;
 
 namespace PayFlow.Application.Features.Auth.Commands
 {
@@ -10,7 +11,7 @@ namespace PayFlow.Application.Features.Auth.Commands
     {
         private readonly IUserRepository _userRepository;
         private readonly IWalletRepository _walletRepository;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly IPasswordService _passwordService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTimeProvider;
 
@@ -18,13 +19,13 @@ namespace PayFlow.Application.Features.Auth.Commands
             IUserRepository userRepository,
             IWalletRepository walletRepository,
             IUnitOfWork unitOfWork,
-            IPasswordHasher passwordHasher,
+            IPasswordService passwordService,
             IDateTimeProvider dateTimeProvider)
         {
             _userRepository = userRepository;
             _walletRepository = walletRepository;
             _unitOfWork = unitOfWork;
-            _passwordHasher = passwordHasher;
+            _passwordService = passwordService;
             _dateTimeProvider = dateTimeProvider;
         }
 
@@ -32,16 +33,20 @@ namespace PayFlow.Application.Features.Auth.Commands
             RegisterCommand command,
             CancellationToken cancellationToken = default)
         {
-            // 1. Guard — email must be unique
+            // 1. Check if email already exists and throw a BusinessRuleException if it does
             var existingUser = await _userRepository.ExistsAsync(command.Email, cancellationToken);
             if (existingUser)
-                throw new BusinessRuleException("Email already exists.", $"A user with email '{command.Email}' already exists.");
+                throw new BusinessRuleException(
+                    title: "Email already exists.",
+                    detail: $"A user with email '{command.Email}' already exists.",
+                    statusCode: (int)HttpStatusCode.Conflict
+                );
 
-            //2. Password hashing
-            var (passwordHash, passwordSalt) = _passwordHasher.Hash(command.Password);
+            //2. Hash the password and generate salt
+            var hashResult = _passwordService.Hash(command.Password);
 
             //3. Create domain objects
-            var newUser = User.Create(command.Email, passwordHash, passwordSalt, _dateTimeProvider.UtcNow);
+            var newUser = User.Create(command.Email, hashResult.Hash, hashResult.Salt, _dateTimeProvider.UtcNow);
             var newWallet = Wallet.Create(newUser.Id);
 
             //4: Persist both in a single transaction

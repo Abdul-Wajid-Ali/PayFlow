@@ -14,12 +14,15 @@ public static class DependencyInjection
     {
         // Command Handlers
         services.AddScoped<ICommandHandler<RegisterCommand, RegisterResponse>, RegisterCommandHandler>();
+        services.AddScoped<ICommandHandler<LoginCommand, LoginResponse>, LoginCommandHandler>();
 
         // Validators
         services.AddScoped<IValidator<RegisterCommand>, RegisterCommandValidator>();
+        services.AddScoped<IValidator<LoginCommand>, LoginCommandValidator>();
 
         // Pipeline Behaviors
-        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+        services.AddScoped<IPipelineBehavior<RegisterCommand, RegisterResponse>, ValidationBehavior<RegisterCommand, RegisterResponse>>();
+        services.AddScoped<IPipelineBehavior<LoginCommand, LoginResponse>, ValidationBehavior<LoginCommand, LoginResponse>>();
 
         return services;
     }

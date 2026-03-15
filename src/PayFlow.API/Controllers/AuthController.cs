@@ -22,7 +22,7 @@ namespace PayFlow.API.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
         {
-            // Create the command
+            // Create RegisterCommand from the request
             var command = new RegisterCommand(Email: request.Email, Password: request.Password);
 
             // Send the command to the handler
@@ -32,14 +32,19 @@ namespace PayFlow.API.Controllers
         }
 
         [HttpPost("login")]
-        [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> Login([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
         {
-            // TODO: Implement LoginCommand and LoginCommandHandler
-            return await Task.FromResult<IActionResult>(StatusCode(StatusCodes.Status501NotImplemented));
+            // Create LoginCommand from the request
+            var command = new LoginCommand(Email: request.Email, Password: request.Password);
+
+            // Send the command to the handler
+            var response = await _sender.SendAsync(command, cancellationToken);
+
+            return Ok(response);
         }
     }
 }
