@@ -10,6 +10,7 @@ namespace PayFlow.Application.Features.Transfers.Commands
     public class TransferCommandHandler : ICommandHandler<TransferCommand, TransferResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDateTimeProvider _dateTimeProvider;
         private readonly IWalletRepository _walletRepository;
         private readonly ITransactionRepository _transactionRepository;
 
@@ -39,48 +40,56 @@ namespace PayFlow.Application.Features.Transfers.Commands
                     statusCode: (int)HttpStatusCode.NotFound);
 
             //3: Load receiver wallet and throw BusinessRuleException if not found
-            var receiverWallet = await _walletRepository.GetByUserIdAsync(command.RecieverUserId, cancellationToken);
+            var receiverWallet = await _walletRepository.GetByUserIdAsync(command.ReceiverUserId, cancellationToken);
             if (receiverWallet is null)
                 throw new BusinessRuleException(
                     title: "Reciever wallet not found.",
                     detail: "No wallet is associated with the Reciever account.",
                     statusCode: (int)HttpStatusCode.NotFound);
 
-            //4: Check if sender and receiver wallets are the same then throw BusinessRuleException
+            //4: Check if transfer currency matches sender and receiver wallet currencies then throw BusinessRuleException
+            if (senderWallet.Currency != command.Currency || receiverWallet.Currency != command.Currency)
+                throw new BusinessRuleException(
+                    title: "Currency mismatch.",
+                    detail: "Transfer currency must match both sender and receiver wallet currencies.",
+                    statusCode: (int)HttpStatusCode.BadRequest);
+
+            //5: Check if sender and receiver wallets are the same then throw BusinessRuleException
             if (senderWallet.Id == receiverWallet.Id)
                 throw new BusinessRuleException(
                     title: "Invalid transfer.",
                     detail: "Sender and receiver cannot be the same wallet.",
                     statusCode: (int)HttpStatusCode.BadRequest);
 
-            //5: Check if sender wallet has sufficient balance then throw BusinessRuleException
+            //6: Check if sender wallet has sufficient balance then throw BusinessRuleException
             if (senderWallet.Balance < command.Amount)
                 throw new BusinessRuleException(
                      title: "Insufficient balance.",
                      detail: $"Available balance {senderWallet.Balance} {senderWallet.Currency} is less than transfer amount {command.Amount}.",
                      statusCode: (int)HttpStatusCode.UnprocessableEntity);
 
-            //6: Create transaction as pending
+            //7: Create transaction as pending
             var transaction = Transaction.Create(
                  fromWalletId: senderWallet.Id,
                  toWalletId: receiverWallet.Id,
                  amount: command.Amount,
                  currency: command.Currency,
-                 idempotencyKey: command.IdempotencyKey
+                 idempotencyKey: command.IdempotencyKey,
+                 createdAt: _dateTimeProvider.UtcNow
              );
 
             await _transactionRepository.AddAsync(transaction, cancellationToken);
 
-            //7: Dedcut/Debit amount from sender wallet
+            //8: Dedcut/Debit amount from sender wallet
             senderWallet.Debit(command.Amount);
 
-            //8: Add/Credit amount to Receiver wallet
+            //9: Add/Credit amount to Receiver wallet
             receiverWallet.Credit(command.Amount);
 
-            //9: Mark transaction as completed
+            //10: Mark transaction as completed
             transaction.MarkCompleted();
 
-            //10: Presist changes atomically
+            //11: Presist changes atomically
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return MapToResponse(transaction);

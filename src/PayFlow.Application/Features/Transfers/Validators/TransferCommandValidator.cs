@@ -8,7 +8,7 @@ namespace PayFlow.Application.Features.Transfers.Validators
         public TransferCommandValidator()
         {
             //1: The receiver user ID must not be empty.
-            RuleFor(x => x.RecieverUserId)
+            RuleFor(x => x.ReceiverUserId)
                 .NotEmpty().WithMessage("Receiver is required.");
 
             //2: The sender user ID must not be empty.

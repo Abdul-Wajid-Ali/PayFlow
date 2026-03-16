@@ -34,7 +34,7 @@ namespace PayFlow.API.Controllers
         {
             var command = new TransferCommand(
                 SenderUserId: _currentUser.UserId,
-                RecieverUserId: request.ReceiverUserId,
+                ReceiverUserId: request.ReceiverUserId,
                 Amount: request.Amount,
                 Currency: request.Currency,
                 IdempotencyKey: idempotencyKey

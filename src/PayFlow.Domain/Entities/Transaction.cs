@@ -31,7 +31,8 @@ public class Transaction
         Guid toWalletId,
         decimal amount,
         string currency,
-        string idempotencyKey)
+        string idempotencyKey,
+        DateTime createdAt)
     {
         return new Transaction
         {
@@ -42,7 +43,7 @@ public class Transaction
             Currency = currency,
             Status = TransactionStatus.Pending,
             IdempotencyKey = idempotencyKey,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = createdAt
         };
     }
 
