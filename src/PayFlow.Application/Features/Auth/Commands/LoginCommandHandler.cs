@@ -23,7 +23,7 @@ namespace PayFlow.Application.Features.Auth.Commands
         public async Task<LoginResponse> HandleAsync(LoginCommand command, CancellationToken cancellationToken = default)
         {
             // 1: Retrieve user by email and throw BusinessRuleException if not found
-            var user = await _userRepository.GetByEmailAsync(command.Email);
+            var user = await _userRepository.GetByEmailAsync(command.Email, cancellationToken);
                 if(user == null)
                   throw new BusinessRuleException(
                     title: "Invalid credentials.",

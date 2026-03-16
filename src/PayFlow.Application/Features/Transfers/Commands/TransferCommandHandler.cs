@@ -26,12 +26,12 @@ namespace PayFlow.Application.Features.Transfers.Commands
         public async Task<TransferResponse> HandleAsync(TransferCommand command, CancellationToken cancellationToken = default)
         {
             //1: Check if transaction with the same idempotency key exists
-            var existing = await _transactionRepository.GetByIdempotencyKeyAsync(command.IdempotencyKey);
+            var existing = await _transactionRepository.GetByIdempotencyKeyAsync(command.IdempotencyKey, cancellationToken);
             if (existing is not null)
                 return MapToResponse(existing);
 
             //2: Load sender wallet and throw BusinessRuleException if not found
-            var senderWallet = await _walletRepository.GetByUserIdAsync(command.SenderUserId);
+            var senderWallet = await _walletRepository.GetByUserIdAsync(command.SenderUserId, cancellationToken);
             if (senderWallet is null)
                 throw new BusinessRuleException(
                     title: "Sender wallet not found.",
@@ -39,7 +39,7 @@ namespace PayFlow.Application.Features.Transfers.Commands
                     statusCode: (int)HttpStatusCode.NotFound);
 
             //3: Load receiver wallet and throw BusinessRuleException if not found
-            var receiverWallet = await _walletRepository.GetByUserIdAsync(command.RecieverUserId);
+            var receiverWallet = await _walletRepository.GetByUserIdAsync(command.RecieverUserId, cancellationToken);
             if (receiverWallet is null)
                 throw new BusinessRuleException(
                     title: "Reciever wallet not found.",
@@ -69,19 +69,19 @@ namespace PayFlow.Application.Features.Transfers.Commands
                  idempotencyKey: command.IdempotencyKey
              );
 
-            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.AddAsync(transaction, cancellationToken);
 
             //7: Dedcut/Debit amount from sender wallet
             senderWallet.Debit(command.Amount);
 
-            //8: Add/Credit amount to receiver wallet
+            //8: Add/Credit amount to Receiver wallet
             receiverWallet.Credit(command.Amount);
 
             //9: Mark transaction as completed
             transaction.MarkCompleted();
 
             //10: Presist changes atomically
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return MapToResponse(transaction);
         }

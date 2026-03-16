@@ -8,8 +8,8 @@ namespace PayFlow.Application.Features.Transfers.Queries
 {
     public class GetTransactionsQueryHandler : IQueryHandler<GetTransactionsQuery, IReadOnlyList<TransactionResponse>>
     {
-        private IWalletRepository _walletRepository;
-        private ITransactionRepository _transactionRepository;
+        private readonly IWalletRepository _walletRepository;
+        private readonly ITransactionRepository _transactionRepository;
 
         public GetTransactionsQueryHandler(IWalletRepository walletRepository, ITransactionRepository transactionRepository)
         {
