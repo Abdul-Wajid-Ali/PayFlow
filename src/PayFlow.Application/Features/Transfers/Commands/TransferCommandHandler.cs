@@ -30,7 +30,7 @@ namespace PayFlow.Application.Features.Transfers.Commands
             if (existing is not null)
                 return MapToResponse(existing);
 
-            //2: Load sender wallet
+            //2: Load sender wallet and throw BusinessRuleException if not found
             var senderWallet = await _walletRepository.GetByUserIdAsync(command.SenderUserId);
             if (senderWallet is null)
                 throw new BusinessRuleException(
@@ -38,7 +38,7 @@ namespace PayFlow.Application.Features.Transfers.Commands
                     detail: "No wallet is associated with the sender account.",
                     statusCode: (int)HttpStatusCode.NotFound);
 
-            //3: Load receiver wallet
+            //3: Load receiver wallet and throw BusinessRuleException if not found
             var receiverWallet = await _walletRepository.GetByUserIdAsync(command.RecieverUserId);
             if (receiverWallet is null)
                 throw new BusinessRuleException(
@@ -46,14 +46,21 @@ namespace PayFlow.Application.Features.Transfers.Commands
                     detail: "No wallet is associated with the Reciever account.",
                     statusCode: (int)HttpStatusCode.NotFound);
 
-            //4: Check if sender wallet has sufficient balance
+            //4: Check if sender and receiver wallets are the same then throw BusinessRuleException
+            if (senderWallet.Id == receiverWallet.Id)
+                throw new BusinessRuleException(
+                    title: "Invalid transfer.",
+                    detail: "Sender and receiver cannot be the same wallet.",
+                    statusCode: (int)HttpStatusCode.BadRequest);
+
+            //5: Check if sender wallet has sufficient balance then throw BusinessRuleException
             if (senderWallet.Balance < command.Amount)
                 throw new BusinessRuleException(
                      title: "Insufficient balance.",
                      detail: $"Available balance {senderWallet.Balance} {senderWallet.Currency} is less than transfer amount {command.Amount}.",
                      statusCode: (int)HttpStatusCode.UnprocessableEntity);
 
-            //5: Create transaction as pending
+            //6: Create transaction as pending
             var transaction = Transaction.Create(
                  fromWalletId: senderWallet.Id,
                  toWalletId: receiverWallet.Id,
@@ -64,19 +71,18 @@ namespace PayFlow.Application.Features.Transfers.Commands
 
             await _transactionRepository.AddAsync(transaction);
 
-            //6: Dedcut/Debit amount from sender wallet
+            //7: Dedcut/Debit amount from sender wallet
             senderWallet.Debit(command.Amount);
 
-            //7: Add/Credit amount to receiver wallet
+            //8: Add/Credit amount to receiver wallet
             receiverWallet.Credit(command.Amount);
 
-            //8: Mark transaction as completed
+            //9: Mark transaction as completed
             transaction.MarkCompleted();
 
-            //9: Presist changes atomically
+            //10: Presist changes atomically
             await _unitOfWork.SaveChangesAsync();
 
-            //10: Map to response and return
             return MapToResponse(transaction);
         }
 
