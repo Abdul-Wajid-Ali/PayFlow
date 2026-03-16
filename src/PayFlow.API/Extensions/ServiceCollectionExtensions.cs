@@ -25,6 +25,7 @@ namespace PayFlow.API.Extensions
             });
 
             // 3: Register global exception handlers
+            services.AddExceptionHandler<DomainExceptionHandler>();
             services.AddExceptionHandler<ValidationExceptionHandler>();
             services.AddExceptionHandler<BusinessRuleExceptionHandler>();
 

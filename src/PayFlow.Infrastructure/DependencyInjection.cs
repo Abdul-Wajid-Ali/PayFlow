@@ -23,6 +23,7 @@ public static class DependencyInjection
         // 2: Register repository implementations and unit of work
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // 3: Register infrastructure services (JWT, password hashing, time provider)

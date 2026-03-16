@@ -1,4 +1,6 @@
-﻿namespace PayFlow.Domain.Entities
+﻿using PayFlow.Domain.Exceptions;
+
+namespace PayFlow.Domain.Entities
 {
     public class Wallet
     {
@@ -33,6 +35,27 @@
                 Currency = currency,
                 Balance = 0.00m
             };
+        }
+
+        //Domain method - deduct amount from balance
+        public void Debit(decimal amount)
+        {
+            if (amount <= 0)
+                throw new InvalidTransferException("Debit amount must be greater than zero.");
+
+            if (Balance < amount)
+                throw new InsufficientBalanceException($"Insufficient balance. Available: {Balance} {Currency}, Requested: {amount}.");
+
+            Balance -= amount;
+        }
+
+        //Domain method - add amount to balance
+        public void Credit(decimal amount)
+        {
+            if (amount <= 0)
+                throw new InvalidTransferException("Credit amount must be greater than zero.");
+
+            Balance += amount;
         }
     }
 }
