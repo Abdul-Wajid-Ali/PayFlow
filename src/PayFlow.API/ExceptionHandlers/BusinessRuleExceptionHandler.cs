@@ -32,11 +32,13 @@ namespace PayFlow.API.ExceptionHandlers
                 Instance = httpContext.Request.Path
             };
 
-            //3: Log the business rule violation with details
-            _logger.LogError(exception
-                , problemDetails.Title
-                , problemDetails.Instance
-                , problemDetails.Detail);
+            //3: Log the business rule violation with structured properties
+            _logger.LogWarning(
+                "Business rule violated — Title: {Title}, Detail: {Detail}, StatusCode: {StatusCode}, Path: {Path}",
+                problemDetails.Title,
+                problemDetails.Detail,
+                problemDetails.Status,
+                problemDetails.Instance);
 
             // 4: Set the response status code and content type
             httpContext.Response.StatusCode = (int)problemDetails.Status;

@@ -1,4 +1,7 @@
-﻿namespace PayFlow.API.Extensions
+﻿using PayFlow.API.Middlewares;
+using Serilog;
+
+namespace PayFlow.API.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
@@ -15,6 +18,20 @@
 
             // Global exception handler to catch unhandled errors across the pipeline
             app.UseExceptionHandler();
+
+            // Attach a correlation ID to every request for end-to-end tracing
+            app.UseMiddleware<CorrelationIdMiddleware>();
+
+            // Serilog structured HTTP request logging with enriched properties
+            app.UseSerilogRequestLogging(options =>
+            {
+                options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+                {
+                    diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+                    diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+                    diagnosticContext.Set("UserAgent", httpContext.Request.Headers.UserAgent.ToString());
+                };
+            });
 
             // Redirect HTTP requests to HTTPS for secure communication
             app.UseHttpsRedirection();

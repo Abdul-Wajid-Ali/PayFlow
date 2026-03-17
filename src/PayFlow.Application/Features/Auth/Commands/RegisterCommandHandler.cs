@@ -1,4 +1,5 @@
-﻿using PayFlow.Application.Common.CQRS;
+﻿using Microsoft.Extensions.Logging;
+using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Exceptions;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Features.Auth.DTOs;
@@ -14,33 +15,42 @@ namespace PayFlow.Application.Features.Auth.Commands
         private readonly IPasswordService _passwordService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly ILogger<RegisterCommandHandler> _logger;
 
         public RegisterCommandHandler(
             IUserRepository userRepository,
             IWalletRepository walletRepository,
             IUnitOfWork unitOfWork,
             IPasswordService passwordService,
-            IDateTimeProvider dateTimeProvider)
+            IDateTimeProvider dateTimeProvider,
+            ILogger<RegisterCommandHandler> logger)
         {
             _userRepository = userRepository;
             _walletRepository = walletRepository;
             _unitOfWork = unitOfWork;
             _passwordService = passwordService;
             _dateTimeProvider = dateTimeProvider;
+            _logger = logger;
         }
 
         public async Task<RegisterResponse> Handle(
             RegisterCommand command,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Registration attempt for Email {Email}", command.Email);
+
             // 1. Check if email already exists and throw a BusinessRuleException if it does
             var existingUser = await _userRepository.ExistsAsync(command.Email, cancellationToken);
             if (existingUser)
+            {
+                _logger.LogWarning("Registration failed: email already exists for Email {Email}", command.Email);
+
                 throw new BusinessRuleException(
                     title: "Email already exists.",
                     detail: $"A user with email '{command.Email}' already exists.",
                     statusCode: (int)HttpStatusCode.Conflict
                 );
+            }
 
             //2. Hash the password and generate salt
             var hashResult = _passwordService.Hash(command.Password);
@@ -53,6 +63,10 @@ namespace PayFlow.Application.Features.Auth.Commands
             await _userRepository.AddAsync(newUser, cancellationToken);
             await _walletRepository.AddAsync(newWallet, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation(
+                "Registration successful. UserId {UserId}, Email {Email}, WalletId {WalletId}",
+                newUser.Id, newUser.Email, newWallet.Id);
 
             //5: Return response DTO
             return new RegisterResponse

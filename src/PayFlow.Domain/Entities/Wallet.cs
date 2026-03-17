@@ -16,10 +16,10 @@ namespace PayFlow.Domain.Entities
         public User? User { get; private set; }
 
         //Navigation collections for transactions where this wallet is sender
-        public ICollection<Transaction> OutgoingTransactions { get; private set; } = new List<Transaction>();
+        public ICollection<Transaction> OutgoingTransactions { get; private set; } = [];
 
         // Navigation collections for transactions where this wallet is receiver
-        public ICollection<Transaction> IncomingTransactions { get; private set; } = new List<Transaction>();
+        public ICollection<Transaction> IncomingTransactions { get; private set; } = [];
 
         // Private constructor to enforce use of factory method
         private Wallet()

@@ -21,7 +21,8 @@ public static class DependencyInjection
         services.AddScoped<IValidator<RegisterCommand>, RegisterCommandValidator>();
         services.AddScoped<IValidator<TransferCommand>, TransferCommandValidator>();
 
-        // 3: Register pipeline behaviors for cross-cutting concerns (validation)
+        // 3: Register pipeline behaviors for cross-cutting concerns (logging, validation)
+        services.AddScoped(typeof(MediatR.IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         services.AddScoped(typeof(MediatR.IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
         return services;

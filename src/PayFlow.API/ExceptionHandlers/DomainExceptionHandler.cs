@@ -40,11 +40,12 @@ namespace PayFlow.API.ExceptionHandlers
                 Instance = httpContext.Request.Path
             };
 
-            //4: Log the domain rule violation with details
-            _logger.LogWarning(exception
-                , problemDetails.Title
-                , problemDetails.Instance
-                , "Domain rule violated — Title: {Title}, Detail: {Detail}, Path: {Path}");
+            //4: Log the domain rule violation with structured properties
+            _logger.LogWarning(
+                "Domain rule violated — Title: {Title}, Detail: {Detail}, Path: {Path}",
+                problemDetails.Title,
+                problemDetails.Detail,
+                problemDetails.Instance);
 
             // 5: Set the response status code and content type
             httpContext.Response.StatusCode = (int)problemDetails.Status;

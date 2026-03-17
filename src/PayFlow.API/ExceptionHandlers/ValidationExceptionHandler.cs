@@ -35,11 +35,11 @@ namespace PayFlow.API.ExceptionHandlers
             foreach (var (key, messages) in validationException.Errors)
                 problemDetails.Errors[key] = messages;
 
-            //3: Log the exception details using the ILogger.
-            _logger.LogError(exception
-                , problemDetails.Title
-                , problemDetails.Instance
-                , problemDetails.Errors);
+            //3: Log the exception details using structured logging.
+            _logger.LogWarning(
+                "Validation failed for {Path} — {ErrorCount} field(s) with errors",
+                problemDetails.Instance,
+                problemDetails.Errors.Count);
 
             //4: Set the HTTP response status code to 400 Bad Request.
             httpContext.Response.StatusCode = (int)problemDetails.Status;
