@@ -21,7 +21,7 @@ namespace PayFlow.Application.Common.Behaviors
             var requestName = typeof(TRequest).Name;
 
             // 2: Log incoming request with payload
-            _logger.LogInformation("Handling {RequestName} with content: {@Request}", requestName, request);
+            _logger.LogInformation("Handling {RequestName}", requestName);
 
             // 3: Start performance timer
             var stopWatch = Stopwatch.StartNew();
@@ -35,8 +35,8 @@ namespace PayFlow.Application.Common.Behaviors
                 stopWatch.Stop();
 
                 // 6: Log successful execution with duration and response
-                _logger.LogInformation("Handled {RequestName} in {ElapsedMilliseconds}ms with response: {@Response}",
-                    requestName, stopWatch.ElapsedMilliseconds, response);
+                _logger.LogInformation("Handled {RequestName} in {ElapsedMilliseconds}ms",
+                    requestName, stopWatch.ElapsedMilliseconds);
 
                 // 7: Return handler response
                 return response;

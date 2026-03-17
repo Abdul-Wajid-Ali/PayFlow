@@ -66,8 +66,8 @@ namespace PayFlow.Application.Features.Transfers.Commands
                 _logger.LogWarning("Transfer failed: receiver wallet not found for UserId {ReceiverUserId}", command.ReceiverUserId);
 
                 throw new BusinessRuleException(
-                    title: "Reciever wallet not found.",
-                    detail: "No wallet is associated with the Reciever account.",
+                    title: "Receiver wallet not found.",
+                    detail: "No wallet is associated with the receiver account.",
                     statusCode: (int)HttpStatusCode.NotFound);
             }
 
