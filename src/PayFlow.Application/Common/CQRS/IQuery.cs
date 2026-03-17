@@ -1,5 +1,8 @@
-﻿namespace PayFlow.Application.Common.CQRS
+﻿using MediatR;
+
+namespace PayFlow.Application.Common.CQRS
 {
-    public interface IQuery<TResponse>
+    // Generic marker interface for queries that return a response of type TResponse.
+    public interface IQuery<TResponse> : IRequest<TResponse>
     { }
 }

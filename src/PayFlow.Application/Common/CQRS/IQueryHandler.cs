@@ -1,8 +1,9 @@
-﻿namespace PayFlow.Application.Common.CQRS
+﻿using MediatR;
+
+namespace PayFlow.Application.Common.CQRS
 {
-    public interface IQueryHandler<in TQuery, TResponse>
-        where TQuery : IQuery<TResponse>
-    {
-        Task<TResponse> HandleAsync(TQuery query, CancellationToken cancellationToken = default);
-    }
+    // Generic interface for handling queries that return a response of type TResponse.
+    public interface IQueryHandler<in TQuery, TResponse> : IRequestHandler<TQuery, TResponse>
+         where TQuery : IQuery<TResponse>
+    { }
 }

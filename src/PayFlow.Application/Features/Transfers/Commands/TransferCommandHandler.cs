@@ -16,15 +16,17 @@ namespace PayFlow.Application.Features.Transfers.Commands
 
         public TransferCommandHandler(
             IUnitOfWork unitOfWork,
+            IDateTimeProvider dateTimeProvider,
             IWalletRepository walletRepository,
             ITransactionRepository transactionRepository)
         {
             _unitOfWork = unitOfWork;
+            _dateTimeProvider = dateTimeProvider;
             _walletRepository = walletRepository;
             _transactionRepository = transactionRepository;
         }
 
-        public async Task<TransferResponse> HandleAsync(TransferCommand command, CancellationToken cancellationToken = default)
+        public async Task<TransferResponse> Handle(TransferCommand command, CancellationToken cancellationToken = default)
         {
             //1: Check if transaction with the same idempotency key exists
             var existing = await _transactionRepository.GetByIdempotencyKeyAsync(command.IdempotencyKey, cancellationToken);

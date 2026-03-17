@@ -1,48 +1,39 @@
 ﻿using FluentValidation;
-using PayFlow.Application.Common.CQRS;
+using MediatR;
 using ValidationException = PayFlow.Application.Common.Exceptions.ValidationException;
 
 namespace PayFlow.Application.Common.Behaviors
 {
-    // Pipeline behavior for validating requests using FluentValidation
     public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
     {
         private readonly IEnumerable<IValidator<TRequest>> _validators;
 
         public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
-        {
-            _validators = validators;
-        }
+            => _validators = validators;
 
-        public async Task<TResponse> HandleAsync(
+        public async Task<TResponse> Handle(
             TRequest request,
-            Func<Task<TResponse>> next,
-            CancellationToken cancellationToken = default)
+            RequestHandlerDelegate<TResponse> next,
+            CancellationToken cancellationToken)
         {
-            // 1: Skip validation entirely if no validators are registered for this request type
-            if (!_validators.Any())
-                return await next();
+            //1: Skip validation if no validators exist
+            if (!_validators.Any()) return await next(cancellationToken);
 
-            // 2: Build a validation context wrapping the incoming request data
+            //2: Create validation context for the request
             var context = new ValidationContext<TRequest>(request);
 
-            // 3: Run every registered validator and flatten all rule failures into one list
-            var validationTasks = _validators
-                .Select(v => v.ValidateAsync(context, cancellationToken));
+            //3: Run all validators in parallel
+            var results = await Task.WhenAll(_validators.Select(v => v.ValidateAsync(context, cancellationToken)));
 
-            var validationResults = await Task.WhenAll(validationTasks);
+            //4: Aggregate all validation failures
+            var failures = results.SelectMany(r => r.Errors).Where(f => f != null).ToList();
 
-            var failures = validationResults
-                .SelectMany(result => result.Errors)
-                .Where(f => f != null)
-                .ToList();
+            //5: Stop pipeline if any validation fails
+            if (failures.Count != 0) throw new ValidationException(failures);
 
-            // 4: Abort the pipeline and surface all validation errors if any rule failed
-            if (failures.Any())
-                throw new ValidationException(failures);
-
-            // 5: All rules passed — hand control to the next behavior or the command handler
-            return await next();
+            //6: Continue to next behavior or handler
+            return await next(cancellationToken);
         }
     }
 }

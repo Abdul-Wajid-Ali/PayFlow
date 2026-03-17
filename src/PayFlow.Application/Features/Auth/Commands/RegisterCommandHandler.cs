@@ -29,7 +29,7 @@ namespace PayFlow.Application.Features.Auth.Commands
             _dateTimeProvider = dateTimeProvider;
         }
 
-        public async Task<RegisterResponse> HandleAsync(
+        public async Task<RegisterResponse> Handle(
             RegisterCommand command,
             CancellationToken cancellationToken = default)
         {

@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PayFlow.Application.Common.CQRS;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using PayFlow.Application.Features.Auth.Commands;
 using PayFlow.Application.Features.Auth.DTOs;
 
@@ -24,7 +24,7 @@ namespace PayFlow.API.Controllers
             var command = new RegisterCommand(Email: request.Email, Password: request.Password);
 
             // Send the command to the handler
-            var response = await _sender.SendAsync(command, cancellationToken);
+            var response = await _sender.Send(command, cancellationToken);
 
             return CreatedAtAction(nameof(Register), new { userId = response.UserId }, response);
         }
@@ -40,7 +40,7 @@ namespace PayFlow.API.Controllers
             var command = new LoginCommand(Email: request.Email, Password: request.Password);
 
             // Send the command to the handler
-            var response = await _sender.SendAsync(command, cancellationToken);
+            var response = await _sender.Send(command, cancellationToken);
 
             return Ok(response);
         }

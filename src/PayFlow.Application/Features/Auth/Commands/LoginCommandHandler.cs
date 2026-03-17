@@ -20,15 +20,15 @@ namespace PayFlow.Application.Features.Auth.Commands
             _userRepository = userRepository;
         }
 
-        public async Task<LoginResponse> HandleAsync(LoginCommand command, CancellationToken cancellationToken = default)
+        public async Task<LoginResponse> Handle(LoginCommand command, CancellationToken cancellationToken = default)
         {
             // 1: Retrieve user by email and throw BusinessRuleException if not found
             var user = await _userRepository.GetByEmailAsync(command.Email, cancellationToken);
-                if(user == null)
-                  throw new BusinessRuleException(
-                    title: "Invalid credentials.",
-                    detail: "Email or password is incorrect.",
-                    statusCode: (int)HttpStatusCode.Unauthorized);
+            if (user == null)
+                throw new BusinessRuleException(
+                  title: "Invalid credentials.",
+                  detail: "Email or password is incorrect.",
+                  statusCode: (int)HttpStatusCode.Unauthorized);
 
             // 2: Check if user is suspended then throw BusinessRuleException if so
             if (user.Status == UserStatus.Suspended)

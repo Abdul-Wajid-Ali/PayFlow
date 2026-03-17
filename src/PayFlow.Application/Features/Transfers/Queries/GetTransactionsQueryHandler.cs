@@ -17,7 +17,7 @@ namespace PayFlow.Application.Features.Transfers.Queries
             _transactionRepository = transactionRepository;
         }
 
-        public async Task<IReadOnlyList<TransactionResponse>> HandleAsync(GetTransactionsQuery query, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<TransactionResponse>> Handle(GetTransactionsQuery query, CancellationToken cancellationToken = default)
         {
             //1: Validate wallet existence and throw BusinessRuleException if not found
             var wallet = await _walletRepository.GetByUserIdAsync(query.UserId, cancellationToken);

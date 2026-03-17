@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Features.Transfers.Commands;
 using PayFlow.Application.Features.Transfers.DTOs;
@@ -40,7 +40,7 @@ namespace PayFlow.API.Controllers
                 IdempotencyKey: idempotencyKey
             );
 
-            var response = await _sender.SendAsync(command, cancellationToken);
+            var response = await _sender.Send(command, cancellationToken);
 
             return CreatedAtAction(nameof(Transfer), new { id = response.TransactionId }, response);
         }

@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Features.Transfers.DTOs;
 using PayFlow.Application.Features.Transfers.Queries;
@@ -33,7 +33,7 @@ namespace PayFlow.API.Controllers
             var query = new GetBalanceQuery(_currentUser.UserId);
 
             // Send the query to the handler
-            var response = await _sender.QueryAsync(query, cancellationToken);
+            var response = await _sender.Send(query, cancellationToken);
 
             return Ok(response);
         }
@@ -48,7 +48,7 @@ namespace PayFlow.API.Controllers
             var query = new GetTransactionsQuery(_currentUser.UserId);
 
             // Send the query to the handler
-            var response = await _sender.QueryAsync(query, cancellationToken);
+            var response = await _sender.Send(query, cancellationToken);
 
             return Ok(response);
         }

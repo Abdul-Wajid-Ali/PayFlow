@@ -1,11 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Infrastructure.Persistence;
 using PayFlow.Infrastructure.Persistence.Repositories;
-using PayFlow.Infrastructure.Pipeline;
 using PayFlow.Infrastructure.Services;
 using PayFlow.Infrastructure.Settings;
 
@@ -32,10 +30,7 @@ public static class DependencyInjection
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-        // 4: Register application pipeline sender implementation
-        services.AddScoped<ISender, Sender>();
-
-        // 5: Bind JwtSettings configuration for IOptions<JwtSettings>
+        // 4: Bind JwtSettings configuration for IOptions<JwtSettings>
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
         return services;

@@ -13,7 +13,7 @@ namespace PayFlow.Application.Features.Wallet.Queries
         public GetBalanceQueryHandler(IWalletRepository walletRepository)
             => _walletRepository = walletRepository;
 
-        public async Task<WalletBalanceResponse> HandleAsync(GetBalanceQuery query, CancellationToken cancellationToken = default)
+        public async Task<WalletBalanceResponse> Handle(GetBalanceQuery query, CancellationToken cancellationToken = default)
         {
             // 1: Retrieve user by email and throw BusinessRuleException if not found
             var userWallet = await _walletRepository.GetByUserIdAsync(query.UserId, cancellationToken)
