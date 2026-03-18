@@ -6,6 +6,7 @@ using PayFlow.Domain.Entities;
 using PayFlow.Infrastructure.Settings;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace PayFlow.Infrastructure.Services
@@ -52,5 +53,23 @@ namespace PayFlow.Infrastructure.Services
                 ExpiresAt: expiresAt
             );
         }
+
+        public string GenerateRefreshToken()
+        {
+            // Generates a cryptographically secure random refresh token encoded in Base64
+            var randomBytes = RandomNumberGenerator.GetBytes(64);
+            return Convert.ToBase64String(randomBytes);
+        }
+
+        public string HashRefreshToken(string refreshToken)
+        {
+            // Creates a SHA256 hash of the refresh token for secure storage
+            var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken));
+            return Convert.ToHexString(hashBytes);
+        }
+
+        // Retrieves the configured refresh token expiration duration (in days)
+        public int GetRefreshTokenExpiryInDays()
+            => _jwtSettings.RefreshTokenExpiryInDays;
     }
 }

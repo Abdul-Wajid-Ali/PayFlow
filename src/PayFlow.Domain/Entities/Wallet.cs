@@ -27,15 +27,13 @@ namespace PayFlow.Domain.Entities
 
         // Factory method to create a new wallet for a user
         public static Wallet Create(Guid userId, string currency = "USD")
-        {
-            return new Wallet
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                Currency = currency,
-                Balance = 0.00m
-            };
-        }
+         => new()
+         {
+             Id = Guid.NewGuid(),
+             UserId = userId,
+             Currency = currency,
+             Balance = 0.00m
+         };
 
         //Domain method - deduct amount from balance
         public void Debit(decimal amount)

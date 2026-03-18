@@ -44,5 +44,35 @@ namespace PayFlow.API.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost("refresh")]
+        [ProducesResponseType(typeof(RefreshTokenResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
+        {
+            // Create RefreshTokenCommand from the request
+            var command = new RefreshTokenCommand(request.RefreshToken);
+
+            // Send the command to the handler
+            var respone = await _sender.Send(command,cancellationToken);
+
+            return Ok(respone);
+        }
+
+        [HttpPost("revoke")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Revoke([FromBody] RevokeTokenRequest request, CancellationToken cancellationToken)
+        {
+            // Create RevokeTokenCommand from the request
+            var command = new RevokeTokenCommand(request.RefreshToken);
+
+            // Send the command to the handler
+            var response = await _sender.Send(command, cancellationToken);
+
+            return Ok(response);
+        }
     }
 }

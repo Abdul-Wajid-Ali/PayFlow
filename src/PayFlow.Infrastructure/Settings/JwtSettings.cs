@@ -12,5 +12,7 @@
         public string Audience { get; init; } = string.Empty;
 
         public int ExpiryInMinutes { get; init; } = 60;
+
+        public int RefreshTokenExpiryInDays { get; init; } = 14;
     }
 }

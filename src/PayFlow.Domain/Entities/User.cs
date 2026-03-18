@@ -16,24 +16,29 @@ namespace PayFlow.Domain.Entities
 
         public DateTime CreatedAt { get; private set; }
 
-        // Navigation property
+        // Navigation property to the user's wallet
         public Wallet? Wallet { get; private set; }
+
+        public ICollection<RefreshToken> RefreshTokens { get; private set; } = [];
 
         // Private constructor to enforce use of factory method
         private User()
         { }
 
-        public static User Create(string email, string passwordHash, string passwordSalt, DateTime createAt)
+        // Factory method to create a new user
+        public static User Create(
+            string email,
+            string passwordHash,
+            string passwordSalt,
+            DateTime createAt)
+        => new()
         {
-            return new User
-            {
-                Id = Guid.NewGuid(),
-                Email = email.ToLowerInvariant().Trim(),
-                PasswordHash = passwordHash,
-                PasswordSalt = passwordSalt,
-                Status = UserStatus.Active,
-                CreatedAt = createAt
-            };
-        }
+            Id = Guid.NewGuid(),
+            Email = email.ToLowerInvariant().Trim(),
+            PasswordHash = passwordHash,
+            PasswordSalt = passwordSalt,
+            Status = UserStatus.Active,
+            CreatedAt = createAt
+        };
     }
 }

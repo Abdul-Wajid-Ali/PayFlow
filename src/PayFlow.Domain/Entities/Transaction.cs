@@ -22,10 +22,14 @@ public class Transaction
 
     // Navigation properties
     public Wallet? FromWallet { get; private set; }
+
     public Wallet? ToWallet { get; private set; }
 
-    private Transaction() { } // EF Core constructor
+    // Private constructor to enforce use of factory method
+    private Transaction()
+    { }
 
+    // Factory method to create a new transaction
     public static Transaction Create(
         Guid fromWalletId,
         Guid toWalletId,
@@ -33,19 +37,17 @@ public class Transaction
         string currency,
         string idempotencyKey,
         DateTime createdAt)
-    {
-        return new Transaction
-        {
-            Id = Guid.NewGuid(),
-            FromWalletId = fromWalletId,
-            ToWalletId = toWalletId,
-            Amount = amount,
-            Currency = currency,
-            Status = TransactionStatus.Pending,
-            IdempotencyKey = idempotencyKey,
-            CreatedAt = createdAt
-        };
-    }
+     => new()
+     {
+         Id = Guid.NewGuid(),
+         FromWalletId = fromWalletId,
+         ToWalletId = toWalletId,
+         Amount = amount,
+         Currency = currency,
+         Status = TransactionStatus.Pending,
+         IdempotencyKey = idempotencyKey,
+         CreatedAt = createdAt
+     };
 
     public void MarkCompleted() => Status = TransactionStatus.Completed;
 
