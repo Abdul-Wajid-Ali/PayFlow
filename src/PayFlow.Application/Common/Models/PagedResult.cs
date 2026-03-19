@@ -27,7 +27,7 @@
             PageSize = pageSize;
             TotalCount = totalCount;
             TotalPages = totalCount == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
-            HasNext = pageNumber < totalCount;
+            HasNext = pageNumber < TotalPages;
             HasPrevious = pageNumber > 1;
         }
     }

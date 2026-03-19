@@ -27,8 +27,8 @@ namespace PayFlow.Application.Features.Wallet.Queries
                 query.UserId);
 
             //1: Validate wallet existence and throw BusinessRuleException if not found
-            var userWallet = await _walletRepository.GetByUserIdAsync(query.UserId, cancellationToken);
-            if (userWallet is null)
+            var balanceDto = await _walletRepository.GetBalanceDtoByUserIdAsync(query.UserId, cancellationToken);
+            if (balanceDto is null)
             {
                 _logger.LogWarning(
                     "Balance retrieval failed: wallet not found for UserId {UserId}",
@@ -42,19 +42,13 @@ namespace PayFlow.Application.Features.Wallet.Queries
 
             _logger.LogInformation(
                 "Balance retrieved successfully for UserId {UserId}. WalletId {WalletId}, Balance {Balance} {Currency}",
-                userWallet.UserId,
-                userWallet.Id,
-                userWallet.Balance,
-                userWallet.Currency);
+                balanceDto.UserId,
+                balanceDto.WalletId,
+                balanceDto.Balance,
+                balanceDto.Currency);
 
-            //2: Map Wallet entity to WalletBalanceResponse DTO
-            return new WalletBalanceResponse
-            (
-                WalletId: userWallet.Id,
-                UserId: userWallet.UserId,
-                Balance: userWallet.Balance,
-                Currency: userWallet.Currency
-            );
+            //2: Return WalletBalanceResponse DTO
+            return balanceDto;
         }
     }
 }

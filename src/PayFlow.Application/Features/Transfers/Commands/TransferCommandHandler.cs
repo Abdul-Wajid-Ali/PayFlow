@@ -132,6 +132,10 @@ namespace PayFlow.Application.Features.Transfers.Commands
             //11: Presist changes atomically
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            //12: Invalidate wallet balance cache entries after successful commit
+            await _walletRepository.InvalidateBalanceAsync(senderWallet.Id, cancellationToken);
+            await _walletRepository.InvalidateBalanceAsync(receiverWallet.Id, cancellationToken);
+
             _logger.LogInformation(
                 "Transfer completed successfully. TransactionId {TransactionId}, From {FromWalletId} to {ToWalletId}, Amount {Amount} {Currency}",
                 transaction.Id, transaction.FromWalletId, transaction.ToWalletId, transaction.Amount, transaction.Currency);

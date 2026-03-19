@@ -13,7 +13,7 @@ namespace PayFlow.Application.Features.Transfers.Validators
 
             // 2: The page number must be between 1 and 100 range.
             RuleFor(x => x.PageSize)
-                .InclusiveBetween(1, 10);
+                .InclusiveBetween(1, 100);
         }
     }
 }
