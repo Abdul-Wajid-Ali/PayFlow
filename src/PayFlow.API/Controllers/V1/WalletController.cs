@@ -1,17 +1,20 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayFlow.Application.Common.Interfaces;
+using PayFlow.Application.Common.Models;
 using PayFlow.Application.Features.Transfers.DTOs;
 using PayFlow.Application.Features.Transfers.Queries;
 using PayFlow.Application.Features.Wallet.DTOs;
 using PayFlow.Application.Features.Wallet.Queries;
 
-namespace PayFlow.API.Controllers
+namespace PayFlow.API.Controllers.V1
 {
-    [ApiController]
     [Authorize]
-    [Route("api/wallet")]
+    [ApiController]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/wallet")]
     public class WalletController : ControllerBase
     {
         private readonly ISender _sender;
@@ -39,13 +42,16 @@ namespace PayFlow.API.Controllers
         }
 
         [HttpGet("transactions")]
-        [ProducesResponseType(typeof(IReadOnlyList<TransactionResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PagedResult<TransactionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetTransactions(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetTransactions(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 20,
+            CancellationToken cancellationToken = default)
         {
             // Create GetTransactionsQuery with the current user's ID
-            var query = new GetTransactionsQuery(_currentUser.UserId);
+            var query = new GetTransactionsQuery(_currentUser.UserId, pageNumber, pageSize);
 
             // Send the query to the handler
             var response = await _sender.Send(query, cancellationToken);

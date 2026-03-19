@@ -1,12 +1,14 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PayFlow.Application.Features.Auth.Commands;
 using PayFlow.Application.Features.Auth.DTOs;
 
-namespace PayFlow.API.Controllers
+namespace PayFlow.API.Controllers.V1
 {
     [ApiController]
-    [Route("api/auth")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/auth")]
     public class AuthController : ControllerBase
     {
         private readonly ISender _sender;

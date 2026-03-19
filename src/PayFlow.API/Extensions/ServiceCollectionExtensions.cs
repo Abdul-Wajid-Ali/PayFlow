@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using PayFlow.API.ExceptionHandlers;
 using PayFlow.Infrastructure.Settings;
@@ -24,15 +25,24 @@ namespace PayFlow.API.Extensions
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
-            // 3: Register global exception handlers
+            // 3: Configure URL path-based API versioning (/api/v{version}/...)
+            services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            });
+
+            // 4: Register global exception handlers
             services.AddExceptionHandler<DomainExceptionHandler>();
             services.AddExceptionHandler<ValidationExceptionHandler>();
             services.AddExceptionHandler<BusinessRuleExceptionHandler>();
 
-            // 4: Bind JWT settings from configuration
+            // 5: Bind JWT settings from configuration
             var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
 
-            // 5: Add authentication and configure JWT bearer validation
+            // 6: Add authentication and configure JWT bearer validation
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -54,7 +64,7 @@ namespace PayFlow.API.Extensions
                         };
                     });
 
-            // 6: Add authorization services
+            // 7: Add authorization services
             services.AddAuthorization();
 
             return services;

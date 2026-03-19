@@ -1,15 +1,17 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Features.Transfers.Commands;
 using PayFlow.Application.Features.Transfers.DTOs;
 
-namespace PayFlow.API.Controllers
+namespace PayFlow.API.Controllers.V1
 {
     [Authorize]
     [ApiController]
-    [Route("api/transfer")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/transfer")]
     public class TransferController : ControllerBase
     {
         private readonly ISender _sender;
