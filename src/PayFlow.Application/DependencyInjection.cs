@@ -4,6 +4,7 @@ using PayFlow.Application.Common.Behaviors;
 using PayFlow.Application.Features.Auth.Commands;
 using PayFlow.Application.Features.Auth.Validators;
 using PayFlow.Application.Features.Transfers.Commands;
+using PayFlow.Application.Features.Transfers.Queries;
 using PayFlow.Application.Features.Transfers.Validators;
 
 namespace PayFlow.Application;
@@ -22,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IValidator<TransferCommand>, TransferCommandValidator>();
         services.AddScoped<IValidator<RefreshTokenCommand>, RefreshTokenCommandValidator>();
         services.AddScoped<IValidator<RevokeTokenCommand>, RevokeTokenCommandValidator>();
+        services.AddScoped<IValidator<GetTransactionsQuery>, GetTransactionsQueryValidator>();
 
         // 3: Register pipeline behaviors for cross-cutting concerns (logging, validation)
         services.AddScoped(typeof(MediatR.IPipelineBehavior<,>), typeof(LoggingBehavior<,>));

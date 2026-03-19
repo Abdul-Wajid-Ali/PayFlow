@@ -2,12 +2,13 @@
 using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Exceptions;
 using PayFlow.Application.Common.Interfaces;
+using PayFlow.Application.Common.Models;
 using PayFlow.Application.Features.Transfers.DTOs;
 using System.Net;
 
 namespace PayFlow.Application.Features.Transfers.Queries
 {
-    public class GetTransactionsQueryHandler : IQueryHandler<GetTransactionsQuery, IReadOnlyList<TransactionResponse>>
+    public class GetTransactionsQueryHandler : IQueryHandler<GetTransactionsQuery, PagedResult<TransactionResponse>>
     {
         private readonly IWalletRepository _walletRepository;
         private readonly ITransactionRepository _transactionRepository;
@@ -23,11 +24,13 @@ namespace PayFlow.Application.Features.Transfers.Queries
             _logger = logger;
         }
 
-        public async Task<IReadOnlyList<TransactionResponse>> Handle(GetTransactionsQuery query, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<TransactionResponse>> Handle(GetTransactionsQuery query, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation(
-                "Transaction retrieval initiated for UserId {UserId}",
-                query.UserId);
+                "Transaction retrieval initiated for UserId {UserId} with page {Page} and page size {PageSize}",
+                query.UserId,
+                query.PageNumber,
+                query.PageSize);
 
             //1: Validate wallet existence and throw BusinessRuleException if not found
             var wallet = await _walletRepository.GetByUserIdAsync(query.UserId, cancellationToken);
@@ -44,7 +47,7 @@ namespace PayFlow.Application.Features.Transfers.Queries
             }
 
             //2: Retrieve transactions for the wallet
-            var transactions = await _transactionRepository.GetByWalletIdAsync(wallet.Id, cancellationToken);
+            var (transactions, totalCount) = await _transactionRepository.GetPagedAsync(wallet.Id, query.PageNumber, query.PageSize, cancellationToken);
 
             _logger.LogInformation(
                 "Retrieved {TransactionCount} transactions for WalletId {WalletId} (UserId {UserId})",
@@ -53,23 +56,28 @@ namespace PayFlow.Application.Features.Transfers.Queries
                 query.UserId);
 
             //3: Map transactions to response DTOs, including direction (incoming/outgoing)
-            var response = transactions.Select(t => new TransactionResponse
-            (
-                TransactionId: t.Id,
-                FromWalletId: t.FromWalletId,
-                ToWalletId: t.ToWalletId,
-                Amount: t.Amount,
-                Currency: t.Currency,
-                Status: t.Status,
-                CreatedAt: t.CreatedAt,
-                Direction: t.FromWalletId == wallet.Id ? "Outgoing" : "Incoming"
-            )).ToList();
+            var items = transactions.Select(t =>
+                new TransactionResponse(
+                    TransactionId: t.Id,
+                    FromWalletId: t.FromWalletId,
+                    ToWalletId: t.ToWalletId,
+                    Amount: t.Amount,
+                    Currency: t.Currency,
+                    Status: t.Status,
+                    CreatedAt: t.CreatedAt,
+                    Direction: t.FromWalletId == wallet.Id ? "Outgoing" : "Incoming"
+                    )).ToList();
 
-            _logger.LogInformation(
-                "Transaction retrieval completed for WalletId {WalletId}",
+            _logger.LogInformation("Retrieved {TransactionCount} transactions out of {TotalCount} for WalletId {WalletId}",
+                items.Count,
+                totalCount,
                 wallet.Id);
 
-            return response;
+            return new PagedResult<TransactionResponse>(
+                items,
+                query.PageNumber,
+                query.PageSize,
+                totalCount);
         }
     }
 }
