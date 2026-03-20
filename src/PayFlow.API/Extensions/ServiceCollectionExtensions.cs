@@ -1,10 +1,14 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using PayFlow.API.Constants;
 using PayFlow.API.ExceptionHandlers;
+using PayFlow.API.RateLimiting;
+using PayFlow.API.Settings;
 using PayFlow.Infrastructure.Settings;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 
 namespace PayFlow.API.Extensions
 {
@@ -66,6 +70,32 @@ namespace PayFlow.API.Extensions
 
             // 7: Add authorization services
             services.AddAuthorization();
+
+            // 8: Read and validate transfer rate-limiting settings
+            var transferRateLimitingOptions = configuration
+                .GetSection(TransferRateLimitingOptions.SectionName)
+                .Get<TransferRateLimitingOptions>();
+
+            // 9: Add per-user fixed-window rate limiting for transfer endpoint
+            services.AddRateLimiter(options =>
+            {
+                options.OnRejected = TransferRateLimitRejectionHandler.HandleAsync;
+
+                options.AddPolicy(RateLimitPolicies.TransferPolicy, httpContext =>
+                {
+                    var userId = httpContext.User.FindFirst("uid")?.Value;
+                    var partitionKey = string.IsNullOrWhiteSpace(userId) ? "missing-uid" : userId;
+
+                    return RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: partitionKey,
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = transferRateLimitingOptions.PermitLimit,
+                            Window = TimeSpan.FromSeconds(transferRateLimitingOptions.WindowSeconds),
+                            QueueLimit = transferRateLimitingOptions.QueueLimit
+                        });
+                });
+            });
 
             return services;
         }

@@ -42,6 +42,9 @@ namespace PayFlow.API.Extensions
             // Enforce authorization policies on authenticated users
             app.UseAuthorization();
 
+            // Apply endpoint-specific rate limiting policies after auth so user claims are available
+            app.UseRateLimiter();
+
             // Map controller endpoints to the routing system
             app.MapControllers();
 
