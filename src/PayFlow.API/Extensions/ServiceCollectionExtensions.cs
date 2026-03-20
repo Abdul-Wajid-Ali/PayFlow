@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using PayFlow.API.Constants;
 using PayFlow.API.ExceptionHandlers;
@@ -96,6 +97,19 @@ namespace PayFlow.API.Extensions
                         });
                 });
             });
+
+            // 10: Register health checks for core infrastructure dependencies
+            services.AddHealthChecks()
+                .AddSqlServer(
+                connectionString: configuration.GetConnectionString("DefaultConnection")!,
+                name: "sqlserver",
+                failureStatus:HealthStatus.Unhealthy,
+                tags: ["db"])
+                .AddRedis(
+                redisConnectionString: configuration["Redis:ConnectionString"]!,
+                name: "redis",
+                failureStatus: HealthStatus.Unhealthy,
+                tags: ["cache"]);
 
             return services;
         }
