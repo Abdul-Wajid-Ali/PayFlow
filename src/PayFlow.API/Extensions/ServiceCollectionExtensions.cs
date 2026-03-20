@@ -45,7 +45,8 @@ namespace PayFlow.API.Extensions
             services.AddExceptionHandler<BusinessRuleExceptionHandler>();
 
             // 5: Bind JWT settings from configuration
-            var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
+            var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
+                ?? throw new InvalidOperationException($"Configuration section '{JwtSettings.SectionName}' is missing or invalid.");
 
             // 6: Add authentication and configure JWT bearer validation
             services.AddAuthentication(options =>
@@ -75,7 +76,8 @@ namespace PayFlow.API.Extensions
             // 8: Read and validate transfer rate-limiting settings
             var transferRateLimitingOptions = configuration
                 .GetSection(TransferRateLimitingOptions.SectionName)
-                .Get<TransferRateLimitingOptions>();
+                .Get<TransferRateLimitingOptions>()
+                 ?? throw new InvalidOperationException($"Configuration section '{TransferRateLimitingOptions.SectionName}' is missing or invalid.");
 
             // 9: Add per-user fixed-window rate limiting for transfer endpoint
             services.AddRateLimiter(options =>
@@ -84,7 +86,7 @@ namespace PayFlow.API.Extensions
 
                 options.AddPolicy(RateLimitPolicies.TransferPolicy, httpContext =>
                 {
-                    var userId = httpContext.User.FindFirst("uid")?.Value;
+                    var userId = httpContext.User.FindFirst("userId")?.Value;
                     var partitionKey = string.IsNullOrWhiteSpace(userId) ? "missing-uid" : userId;
 
                     return RateLimitPartition.GetFixedWindowLimiter(

@@ -10,7 +10,7 @@ namespace PayFlow.Infrastructure.Services
         public CurrentUserService(IHttpContextAccessor httpContextAccessor)
             => _httpContextAccessor = httpContextAccessor;
 
-        // Read the user ID from the "uid" claim in the JWT token. If the claim is not present or cannot be parsed, return Guid.Empty.
+        // Read the user ID from the "userId" claim in the JWT token. If the claim is not present or cannot be parsed, return Guid.Empty.
         public Guid UserId
             => Guid.TryParse(_httpContextAccessor.HttpContext?.User?.FindFirst("userId")?.Value, out var id) ? id : Guid.Empty;
 
