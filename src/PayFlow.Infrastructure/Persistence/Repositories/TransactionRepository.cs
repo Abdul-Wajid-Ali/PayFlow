@@ -16,6 +16,11 @@ namespace PayFlow.Infrastructure.Persistence.Repositories
         public async Task<Transaction?> GetByIdempotencyKeyAsync(string idempotencyKey, CancellationToken cancellationToken = default)
             => await _dbContext.Transactions.FirstOrDefaultAsync(t => t.IdempotencyKey == idempotencyKey, cancellationToken);
 
+        public async Task<Transaction?> GetByIdempotencyKeyAndWalletIdAsync(string idempotencyKey, Guid walletId, CancellationToken cancellationToken = default)
+            => await _dbContext.Transactions.FirstOrDefaultAsync(
+                t => t.IdempotencyKey == idempotencyKey && (t.FromWalletId == walletId || t.ToWalletId == walletId),
+                cancellationToken);
+
         public async Task<Transaction?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
             => await _dbContext.Transactions.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 

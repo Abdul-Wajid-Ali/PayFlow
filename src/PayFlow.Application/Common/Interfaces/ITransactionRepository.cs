@@ -8,6 +8,8 @@ namespace PayFlow.Application.Common.Interfaces
 
         Task<Transaction?> GetByIdempotencyKeyAsync(string idempotencyKey, CancellationToken cancellationToken = default);
 
+        Task<Transaction?> GetByIdempotencyKeyAndWalletIdAsync(string idempotencyKey, Guid walletId, CancellationToken cancellationToken = default);
+
         Task<(IReadOnlyList<Transaction> Items, int TotalCount)> GetPagedAsync(
             Guid walletId,
             int page,

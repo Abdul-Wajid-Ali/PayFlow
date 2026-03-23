@@ -43,6 +43,7 @@ namespace PayFlow.API.Extensions
             services.AddExceptionHandler<DomainExceptionHandler>();
             services.AddExceptionHandler<ValidationExceptionHandler>();
             services.AddExceptionHandler<BusinessRuleExceptionHandler>();
+            services.AddExceptionHandler<IdempotencyConflictExceptionHandler>();
 
             // 5: Bind JWT settings from configuration
             var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()

@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<IValidator<RefreshTokenCommand>, RefreshTokenCommandValidator>();
         services.AddScoped<IValidator<RevokeTokenCommand>, RevokeTokenCommandValidator>();
         services.AddScoped<IValidator<GetTransactionsQuery>, GetTransactionsQueryValidator>();
+        services.AddScoped<IValidator<TransferCommandV2>, TransferCommandValidatorV2>();
 
         // 3: Register pipeline behaviors for cross-cutting concerns (logging, validation)
         services.AddScoped(typeof(MediatR.IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
