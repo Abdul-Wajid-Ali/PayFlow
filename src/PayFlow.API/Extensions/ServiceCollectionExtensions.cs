@@ -37,7 +37,7 @@ namespace PayFlow.API.Extensions
                 options.AssumeDefaultVersionWhenUnspecified = true;
                 options.ReportApiVersions = true;
                 options.ApiVersionReader = new UrlSegmentApiVersionReader();
-            });
+            }).AddMvc();
 
             // 4: Register global exception handlers
             services.AddExceptionHandler<DomainExceptionHandler>();
@@ -106,7 +106,7 @@ namespace PayFlow.API.Extensions
                 .AddSqlServer(
                 connectionString: configuration.GetConnectionString("DefaultConnection")!,
                 name: "sqlserver",
-                failureStatus:HealthStatus.Unhealthy,
+                failureStatus: HealthStatus.Unhealthy,
                 tags: ["db"])
                 .AddRedis(
                 redisConnectionString: configuration["Redis:ConnectionString"]!,
