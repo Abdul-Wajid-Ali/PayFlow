@@ -1,0 +1,9 @@
+services:
+  payflow.api:
+    image: ${DOCKER_REGISTRY-}payflowapi
+    build:
+      context: .
+      dockerfile: src/PayFlow.API/Dockerfile
+    ports:
+      - "5000:5000"
+      - "5001:5001"

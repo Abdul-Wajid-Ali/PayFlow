@@ -9,4 +9,7 @@
     <Project Path="tests/PayFlow.IntegrationTests/PayFlow.IntegrationTests.csproj" />
     <Project Path="tests/PayFlow.UnitTests/PayFlow.UnitTests.csproj" />
   </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
 </Solution>
