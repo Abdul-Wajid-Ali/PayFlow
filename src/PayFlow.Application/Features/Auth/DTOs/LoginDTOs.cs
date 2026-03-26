@@ -4,7 +4,7 @@
     public record LoginRequest(string Email, string Password);
 
     // DTO for returning Login Response
-    public record LoginResponse(Guid UserId, string Email, string AccessToken,string RefreshToken, DateTime ExpiresAt);
+    public record LoginResponse(Guid UserId, string Email, string AccessToken, string RefreshToken, DateTime ExpiresAt);
 
     // DTO for receiving Refresh Token Request
     public record RefreshTokenRequest(string RefreshToken);

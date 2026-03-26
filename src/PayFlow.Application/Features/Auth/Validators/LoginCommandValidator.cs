@@ -5,7 +5,7 @@ namespace PayFlow.Application.Features.Auth.Validators
 {
     public class LoginCommandValidator : AbstractValidator<LoginCommand>
     {
-        public LoginCommandValidator() 
+        public LoginCommandValidator()
         {
             //1: The email must not be empty and must be in a valid email format.
             RuleFor(x => x.Email)

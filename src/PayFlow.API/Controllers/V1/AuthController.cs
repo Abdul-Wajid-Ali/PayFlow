@@ -58,7 +58,7 @@ namespace PayFlow.API.Controllers.V1
             var command = new RefreshTokenCommand(request.RefreshToken);
 
             // Send the command to the handler
-            var respone = await _sender.Send(command,cancellationToken);
+            var respone = await _sender.Send(command, cancellationToken);
 
             return Ok(respone);
         }

@@ -7,12 +7,12 @@ namespace PayFlow.Application.Features.Transfers.DTOs
 
     //DTO for returning Transfer Response
     public record TransferResponse(
-        Guid TransactionId, 
-        Guid FromWalletId, 
-        Guid ToWalletId, 
-        decimal Amount, 
-        string Currency, 
-        TransactionStatus Status, 
+        Guid TransactionId,
+        Guid FromWalletId,
+        Guid ToWalletId,
+        decimal Amount,
+        string Currency,
+        TransactionStatus Status,
         DateTime CreatedAt);
 
     //DTO for returning Transfer Response with Direction
