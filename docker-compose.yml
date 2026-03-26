@@ -13,11 +13,11 @@ services:
     ports:
       - "5000:5000"
       - "5001:5001"
-    # depends_on:
-    #   sqlserver:
-    #     condition: service_healthy
-    #   redis:
-    #     condition: service_healthy
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
