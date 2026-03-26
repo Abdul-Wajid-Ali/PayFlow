@@ -1,0 +1,25 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: payflow-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "YourStr0ng!Passw0rd"
+    ports:
+      - "1433:1433"
+    volumes:
+      - payflow-sqlserver-data:/var/opt/mssql
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: payflow-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - payflow-redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  payflow-sqlserver-data:
+  payflow-redis-data:
