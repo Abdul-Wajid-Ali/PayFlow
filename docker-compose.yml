@@ -7,13 +7,13 @@ services:
       dockerfile: src/PayFlow.API/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
-      - ASPNETCORE_HTTPS_PORTS=8000
-      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
-      - Redis__ConnectionString=${REDIS_CONNECTION_STRING}
+      - ASPNETCORE_HTTP_PORTS=5000
+      - ASPNETCORE_HTTPS_PORTS=5001
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PayFlow;User Id=sa;Password=PayFlow@123!;TrustServerCertificate=True;Encrypt=True;MultipleActiveResultSets=True
+      - Redis__ConnectionString=redis:6379
     ports:
-      - "8080:8080"
-      - "8000:8000"
+      - "5000:5000"
+      - "5001:5001"
 
   # Configures SQL Server container with persistent storage for application database
   sqlserver:
@@ -22,7 +22,7 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_PID=Developer
-      - MSSQL_SA_PASSWORD=${SA_PASSWORD}
+      - MSSQL_SA_PASSWORD=PayFlow@123!
     ports:
       - "1433:1433"
     volumes:
@@ -43,8 +43,8 @@ services:
     image: rabbitmq:4.1-management-alpine
     container_name: rabbitmq-dev
     environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
+      - RABBITMQ_DEFAULT_USER=payflow
+      - RABBITMQ_DEFAULT_PASS=payflow123
     ports:
       - "5672:5672"
       - "15672:15672"

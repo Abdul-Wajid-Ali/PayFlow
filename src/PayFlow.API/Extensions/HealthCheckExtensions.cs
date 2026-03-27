@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using PayFlow.API.Settings;
+using PayFlow.Infrastructure.Configuration;
 using RabbitMQ.Client;
 
 namespace PayFlow.API.Extensions
