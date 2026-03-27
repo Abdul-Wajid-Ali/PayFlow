@@ -13,11 +13,6 @@ services:
     ports:
       - "5000:5000"
       - "5001:5001"
-    depends_on:
-      sqlserver:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -31,7 +26,7 @@ services:
     volumes:
       - sqlserver_data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "(/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"PayFlow@123!\" -Q \"SELECT 1\") || (/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"PayFlow@123!\" -Q \"SELECT 1\" -C) || exit 1"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"PayFlow@123!\" -Q \"SELECT 1\" -C || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -51,6 +46,25 @@ services:
       timeout: 3s
       retries: 10
 
+  rabbitmq:
+    image: rabbitmq:4.1-management-alpine
+    container_name: rabbitmq-dev
+    environment:
+      - RABBITMQ_DEFAULT_USER=payflow
+      - RABBITMQ_DEFAULT_PASS=payflow123
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
 volumes:
   sqlserver_data:
   redis_data:
+  rabbitmq_data:
