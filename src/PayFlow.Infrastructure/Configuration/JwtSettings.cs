@@ -1,7 +1,7 @@
-﻿namespace PayFlow.Infrastructure.Settings
+﻿namespace PayFlow.Infrastructure.Configuration
 {
-    // This class represents the settings required for JWT token generation and validation.
-    public class JwtSettings
+    // Represents configuration settings for JWT token generation, validation, and lifetime management.
+    public sealed class JwtSettings
     {
         public const string SectionName = "JwtSettings";
 

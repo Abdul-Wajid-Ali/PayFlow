@@ -3,7 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Common.Models;
 using PayFlow.Domain.Entities;
-using PayFlow.Infrastructure.Settings;
+using PayFlow.Infrastructure.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;

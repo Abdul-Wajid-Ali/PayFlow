@@ -1,14 +1,16 @@
-﻿using Asp.Versioning;
+﻿using System.Text;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
+using System.Threading.RateLimiting;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using PayFlow.API.Constants;
 using PayFlow.API.ExceptionHandlers;
 using PayFlow.API.RateLimiting;
-using PayFlow.API.Settings;
-using PayFlow.Infrastructure.Settings;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.RateLimiting;
+using PayFlow.Infrastructure.Configuration;
 
 namespace PayFlow.API.Extensions
 {
@@ -99,6 +101,9 @@ namespace PayFlow.API.Extensions
                         });
                 });
             });
+
+            // 10: Register health checks for core infrastructure dependencies
+            services.AddDependencyHealthChecks(configuration);
 
             return services;
         }

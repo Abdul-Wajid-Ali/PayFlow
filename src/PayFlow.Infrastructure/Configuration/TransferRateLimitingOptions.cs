@@ -1,6 +1,7 @@
-﻿namespace PayFlow.API.Settings
+﻿namespace PayFlow.Infrastructure.Configuration
 {
-    public class TransferRateLimitingOptions
+    // Defines configuration options controlling rate limiting behavior for transfer operations.
+    public sealed class TransferRateLimitingOptions
     {
         public const string SectionName = "RateLimiting:Transfer";
 

@@ -4,10 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PayFlow.Application.Common.Interfaces;
+using PayFlow.Infrastructure.Configuration;
 using PayFlow.Infrastructure.Persistence;
 using PayFlow.Infrastructure.Persistence.Repositories;
 using PayFlow.Infrastructure.Services;
-using PayFlow.Infrastructure.Settings;
 
 namespace PayFlow.Infrastructure;
 
