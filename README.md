@@ -51,14 +51,21 @@ This project uses **Clean Architecture** and **CQRS** intentionally:
 
 ## Features
 
-- JWT-based authentication (`register`, `login`)
+- JWT-based authentication (`register`, `login`) with refresh token support
 - Wallet balance retrieval for authenticated users
-- Transfer flow with **idempotency key** support
-- Transaction history endpoint
+- Transfer flow with **idempotency key** support and conflict handling
+- Transaction history endpoint with pagination
 - FluentValidation-based command validation
 - Structured logging with Serilog (console + rolling file sinks)
 - Correlation ID middleware for request tracing
 - SQL Server persistence via Entity Framework Core
+- Redis caching for read-heavy queries (wallet balance)
+- RabbitMQ message broker integration
+- Health checks for SQL Server and Redis
+- API versioning (v1/v2)
+- Transfer rate limiting (configurable)
+- Docker containerization with multi-stage builds
+- Docker Compose orchestration (API, SQL Server, Redis, RabbitMQ)
 
 ---
 
@@ -69,12 +76,17 @@ This project uses **Clean Architecture** and **CQRS** intentionally:
 - **.NET 10** (ASP.NET Core Web API)
 - **C#**
 - **Clean Architecture**
-- **CQRS + MediatR**
-- **FluentValidation**
+- **CQRS + MediatR 12.5**
+- **FluentValidation 12.1**
 - **Entity Framework Core 10**
-- **SQL Server**
+- **SQL Server 2022**
+- **Redis 7.2** (StackExchange.Redis 2.12.8) — caching
+- **RabbitMQ 4.1** — message broker
 - **JWT Bearer Authentication**
-- **Serilog**
+- **Serilog 10**
+- **API Versioning** (Asp.Versioning.Mvc 8.1.1)
+- **Health Checks** (AspNetCore.HealthChecks for SQL Server & Redis)
+- **Docker & Docker Compose** — containerization
 
 ---
 
@@ -114,7 +126,7 @@ This structure reduces coupling and enables easier unit/integration testing per 
 ### Prerequisites
 
 - [.NET SDK 10.0+](https://dotnet.microsoft.com/download)
-- SQL Server instance (LocalDB works for development)
+- [Docker & Docker Compose](https://www.docker.com/) (recommended) **or** a local SQL Server, Redis, and RabbitMQ instance
 - Git
 
 ### Installation
@@ -124,7 +136,38 @@ git clone https://github.com/Abdul-Wajid-Ali/PayFlow.git
 cd PayFlow
 ```
 
-Restore dependencies:
+### Run with Docker (Recommended)
+
+The fastest way to get started — Docker Compose brings up the API and all its dependencies (SQL Server, Redis, RabbitMQ) in one command:
+
+```bash
+docker-compose up -d
+```
+
+| Service        | Port(s)              | Notes                          |
+|----------------|----------------------|--------------------------------|
+| PayFlow API    | `5000` (HTTP), `5001` (HTTPS) | ASP.NET Core application |
+| SQL Server     | `1433`               | SA password: `PayFlow@123!`    |
+| Redis          | `6379`               | AOF persistence enabled        |
+| RabbitMQ       | `5672` (AMQP), `15672` (Management UI) | Credentials: `payflow` / `payflow123` |
+
+All services include health checks and persistent volumes. The API waits for SQL Server and Redis to be healthy before starting.
+
+To stop all services:
+
+```bash
+docker-compose down
+```
+
+To stop and remove volumes (reset data):
+
+```bash
+docker-compose down -v
+```
+
+### Run with .NET CLI (Alternative)
+
+If you prefer running without Docker, ensure you have SQL Server, Redis, and RabbitMQ running locally, then:
 
 ```bash
 dotnet restore
@@ -142,7 +185,7 @@ dotnet ef database update --project src/PayFlow.Infrastructure --startup-project
 > dotnet tool install --global dotnet-ef
 > ```
 
-### Run the API
+Run the API:
 
 ```bash
 dotnet run --project src/PayFlow.API
@@ -247,13 +290,23 @@ You can also use `src/PayFlow.API/PayFlow.API.http` for quick local requests.
 ```text
 PayFlow/
 ├─ src/
-│  ├─ PayFlow.API/              # Presentation layer: controllers, middleware, pipeline
+│  ├─ PayFlow.API/
+│  │  ├─ Controllers/V1/, V2/   # Versioned API controllers
+│  │  ├─ Middlewares/            # Correlation ID, etc.
+│  │  ├─ ExceptionHandlers/     # Global exception handling
+│  │  ├─ Extensions/            # Service registration extensions
+│  │  ├─ RateLimiting/          # Rate limiting configuration
+│  │  ├─ Dockerfile             # Multi-stage Docker build
+│  │  └─ Program.cs             # Entry point & DI wiring
 │  ├─ PayFlow.Application/      # Use cases: CQRS handlers, validators, DTOs, interfaces
 │  ├─ PayFlow.Domain/           # Core domain model (entities, enums, exceptions)
 │  └─ PayFlow.Infrastructure/   # EF Core, repositories, external services, migrations
 ├─ tests/
 │  ├─ PayFlow.UnitTests/
 │  └─ PayFlow.IntegrationTests/
+├─ docker-compose.yml            # Full stack: API + SQL Server + Redis + RabbitMQ
+├─ docker-compose.override.yml   # Development overrides (secrets, certs)
+├─ .dockerignore
 ├─ PayFlow.slnx
 └─ README.md
 ```
@@ -269,11 +322,14 @@ Configuration is primarily in:
 
 ### Key Settings
 
-- `ConnectionStrings:DefaultConnection`
-- `JwtSettings:SecretKey`
-- `JwtSettings:Issuer`
-- `JwtSettings:Audience`
-- `JwtSettings:ExpiryInMinutes`
+- `ConnectionStrings:DefaultConnection` — SQL Server connection string
+- `JwtSettings:SecretKey` / `Issuer` / `Audience` / `ExpiryInMinutes`
+- `JwtSettings:RefreshTokenExpiryInDays` — refresh token lifetime (default: 14)
+- `Redis:ConnectionString` — Redis connection (default: `localhost:6379`)
+- `RabbitMQ:HostName` / `Port` / `UserName` / `Password` — message broker
+- `RabbitMQ:Exchange` / `RetryCount` — exchange name and retry policy
+- `RateLimiting:Transfers:PermitLimit` — max transfer requests per window (default: 5)
+- `RateLimiting:Transfers:WindowInSeconds` — rate limit window (default: 60)
 - `Serilog` sinks and log levels
 
 ### Environment Variables (recommended for production)
@@ -284,6 +340,12 @@ JwtSettings__SecretKey="<your-long-random-secret>"
 JwtSettings__Issuer="PayFlow.API"
 JwtSettings__Audience="PayFlow.Client"
 JwtSettings__ExpiryInMinutes="60"
+JwtSettings__RefreshTokenExpiryInDays="14"
+Redis__ConnectionString="<redis-host>:6379"
+RabbitMQ__HostName="<rabbitmq-host>"
+RabbitMQ__Port="5672"
+RabbitMQ__UserName="payflow"
+RabbitMQ__Password="<password>"
 ASPNETCORE_ENVIRONMENT="Production"
 ```
 
@@ -312,13 +374,13 @@ dotnet test tests/PayFlow.IntegrationTests
 
 ## Roadmap
 
-- [ ] Add refresh token support and token revocation
+- [x] Add refresh token support and token revocation
+- [x] Add caching for read-heavy queries (Redis)
+- [x] Containerize with Docker and provide compose setup
 - [ ] Add role/permission-based authorization
 - [ ] Add transfer limits and configurable business rules
-- [ ] Add caching for read-heavy queries
 - [ ] Add comprehensive integration test scenarios with seeded data
 - [ ] Add CI pipeline (build, test, lint, security scan)
-- [ ] Containerize with Docker and provide compose setup
 - [ ] Add observability (metrics/tracing dashboards)
 
 ---

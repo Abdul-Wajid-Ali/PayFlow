@@ -13,7 +13,6 @@ builder.Host.UseSerilog((context, loggerConfiguration)
 // 3: Register services in the DI container for API, Application, and Infrastructure layers
 builder.Services
     .AddApiServices(builder.Configuration)
-    .AddHealthCheckServices(builder.Configuration)
     .AddApplicationServices()
     .AddInfrastructure(builder.Configuration);
 
