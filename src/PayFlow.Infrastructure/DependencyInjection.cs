@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Infrastructure.Messaging;
 using PayFlow.Infrastructure.Messaging.Connection;
+using PayFlow.Infrastructure.Messaging.Consumers;
 using PayFlow.Infrastructure.Options;
 using PayFlow.Infrastructure.Persistence;
 using PayFlow.Infrastructure.Persistence.Repositories;
@@ -38,13 +39,24 @@ public static class DependencyInjection
 
         // 3: Register infrastructure services (JWT, password hashing, time provider)
         services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IEventPublisher, RabbitMqPublisher>();
         services.AddSingleton<IPasswordService, PasswordService>();
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         // 4: Register EF Core DbContext with SQL Server
         services.AddDbContext<PayFlowDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+        {
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+            options.UseSqlServer(connectionString, sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(10),
+                    errorNumbersToAdd: null);
+            });
+        });
 
         //5: Bind RedisOptions from appsettings.json and validate at startup
         services.AddOptions<RedisOptions>()
@@ -76,6 +88,7 @@ public static class DependencyInjection
         // Register the same instance as a hosted service so the host manages its lifecycle
         services.AddHostedService(sp => sp.GetRequiredService<RabbitMqConnectionManager>());
         services.AddHostedService<OutboxWorker>();
+        services.AddHostedService<NotificationConsumer>();
 
         return services;
     }

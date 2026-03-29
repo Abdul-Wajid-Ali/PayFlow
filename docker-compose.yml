@@ -14,6 +14,9 @@ services:
     ports:
       - "5000:5000"
       - "5001:5001"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   # Configures SQL Server container with persistent storage for application database
   sqlserver:
@@ -50,6 +53,11 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 # Defines named volumes to persist data for database, cache, and message broker across container restarts
 volumes:
