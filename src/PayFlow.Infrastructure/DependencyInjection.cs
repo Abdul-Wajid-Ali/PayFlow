@@ -1,10 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using PayFlow.Application.Common.Interfaces;
-using PayFlow.Infrastructure.Configuration;
+using PayFlow.Infrastructure.Messaging;
+using PayFlow.Infrastructure.Messaging.Connection;
+using PayFlow.Infrastructure.Options;
 using PayFlow.Infrastructure.Persistence;
 using PayFlow.Infrastructure.Persistence.Repositories;
 using PayFlow.Infrastructure.Services;
@@ -16,26 +20,15 @@ public static class DependencyInjection
     // Registers infrastructure services and external implementations
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // 1: Register EF Core DbContext with SQL Server
-        services.AddDbContext<PayFlowDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-
-        // 2: Register repository implementations and unit of work
+        // 1: Register unit of work and repository implementations
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IOutboxRepository, OutboxRepository>();
+        services.AddScoped<WalletRepository>(); // Register the concrete inner repository directly
 
-        // 3: Register the concrete inner repository directly
-        services.AddScoped<WalletRepository>();
-
-        // 4: Register Redis distributed cache
-        services.AddStackExchangeRedisCache(options =>
-        {
-            options.Configuration = configuration["Redis:ConnectionString"];
-        });
-
-        // 5: Decorator: IWalletRepository → CachedWalletRepository wrapping WalletRepository
+        // 2: Decorator: IWalletRepository → CachedWalletRepository wrapping WalletRepository
         services.AddScoped<IWalletRepository>(sp =>
         new CachedWalletRepository(
             sp.GetRequiredService<WalletRepository>(),
@@ -43,14 +36,46 @@ public static class DependencyInjection
             sp.GetRequiredService<ILogger<CachedWalletRepository>>())
         );
 
-        // 6: Register infrastructure services (JWT, password hashing, time provider)
+        // 3: Register infrastructure services (JWT, password hashing, time provider)
         services.AddScoped<IJwtService, JwtService>();
         services.AddSingleton<IPasswordService, PasswordService>();
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-        // 7: Bind JwtSettings configuration for IOptions<JwtSettings>
-        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+        // 4: Register EF Core DbContext with SQL Server
+        services.AddDbContext<PayFlowDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+        //5: Bind RedisOptions from appsettings.json and validate at startup
+        services.AddOptions<RedisOptions>()
+            .Bind(configuration.GetSection(RedisOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // 6: Register Redis cache services with default configuration (options will be configured via DI in step 4)
+        services.AddStackExchangeRedisCache(_ => { });
+
+        // 7: Configure Redis distributed cache by binding RedisOptions and applying them to RedisCacheOptions via DI
+        services.AddOptions<RedisCacheOptions>()
+            .Configure<IOptions<RedisOptions>>((cacheOptions, redisOptions) =>
+            {
+                cacheOptions.Configuration = redisOptions.Value.ConnectionString;
+            });
+
+        //8: Bind RabbitMqOptions from appsettings.json and validate at startup
+        services.AddOptions<RabbitMqOptions>()
+            .Bind(configuration.GetSection(RabbitMqOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // 9: Register RabbitMQ connection as a singleton service and expose it via an interface for other services to use
+        services.AddSingleton<RabbitMqConnectionManager>();
+        services.AddSingleton<IRabbitMqConnectionProvider>(sp => sp.GetRequiredService<RabbitMqConnectionManager>());
+
+        // 10: Register hosted services for RabbitMQ connection management and outbox processing
+        // Register the same instance as a hosted service so the host manages its lifecycle
+        services.AddHostedService(sp => sp.GetRequiredService<RabbitMqConnectionManager>());
+        services.AddHostedService<OutboxWorker>();
 
         return services;
     }

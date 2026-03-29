@@ -1,10 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
+using PayFlow.Application.Common.Constants;
 using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Exceptions;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Features.Auth.DTOs;
 using PayFlow.Domain.Entities;
+using PayFlow.Domain.Events;
 using System.Net;
+using System.Text.Json;
 
 namespace PayFlow.Application.Features.Auth.Commands
 {
@@ -12,14 +15,17 @@ namespace PayFlow.Application.Features.Auth.Commands
     {
         private readonly IUserRepository _userRepository;
         private readonly IWalletRepository _walletRepository;
-        private readonly IPasswordService _passwordService;
+        private readonly IOutboxRepository _outboxRepository;
         private readonly IUnitOfWork _unitOfWork;
+
+        private readonly IPasswordService _passwordService;
         private readonly IDateTimeProvider _dateTimeProvider;
         private readonly ILogger<RegisterCommandHandler> _logger;
 
         public RegisterCommandHandler(
             IUserRepository userRepository,
             IWalletRepository walletRepository,
+            IOutboxRepository outboxRepository,
             IUnitOfWork unitOfWork,
             IPasswordService passwordService,
             IDateTimeProvider dateTimeProvider,
@@ -27,6 +33,7 @@ namespace PayFlow.Application.Features.Auth.Commands
         {
             _userRepository = userRepository;
             _walletRepository = walletRepository;
+            _outboxRepository = outboxRepository;
             _unitOfWork = unitOfWork;
             _passwordService = passwordService;
             _dateTimeProvider = dateTimeProvider;
@@ -55,20 +62,39 @@ namespace PayFlow.Application.Features.Auth.Commands
             //2. Hash the password and generate salt
             var hashResult = _passwordService.Hash(command.Password);
 
-            //3. Create domain objects
-            var newUser = User.Create(command.Email, hashResult.Hash, hashResult.Salt, _dateTimeProvider.UtcNow);
-            var newWallet = PayFlow.Domain.Entities.Wallet.Create(newUser.Id);
+            //3. Create User, Wallet, OutboxMessage entities and UserRegisteredEvent
+            var newUser = User.Create(
+                email: command.Email,
+                passwordHash: hashResult.Hash,
+                passwordSalt: hashResult.Salt,
+                createAt: _dateTimeProvider.UtcNow);
 
-            //4: Persist both in a single transaction
+            var newWallet = Domain.Entities.Wallet.Create(userId: newUser.Id);
+
+            var @event = new UserRegisteredEvent(
+                UserId: newUser.Id,
+                WalletId: newWallet.Id,
+                CreatedAt: newUser.CreatedAt);
+
+            var newOutboxMessage = OutboxMessage.Create(
+                eventType: nameof(UserRegisteredEvent),
+                payload: JsonSerializer.Serialize(@event),
+                routingKey: DomainEvents.UserRegistered,
+                createdAt: _dateTimeProvider.UtcNow);
+
+            //4. Save entities in a transaction
             await _userRepository.AddAsync(newUser, cancellationToken);
             await _walletRepository.AddAsync(newWallet, cancellationToken);
+            await _outboxRepository.AddAsync(newOutboxMessage, cancellationToken);
+
+            // 5: Commit transaction
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Registration successful. UserId {UserId}, Email {Email}, WalletId {WalletId}",
                 newUser.Id, newUser.Email, newWallet.Id);
 
-            //5: Return response DTO
+            //6: Return response DTO
             return new RegisterResponse
             (
                 UserId: newUser.Id,

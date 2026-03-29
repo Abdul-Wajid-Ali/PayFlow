@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
-using PayFlow.Infrastructure.Configuration;
+using Microsoft.Extensions.Options;
+using PayFlow.Infrastructure.Options;
 using RabbitMQ.Client;
 
 namespace PayFlow.API.Extensions
@@ -8,42 +9,39 @@ namespace PayFlow.API.Extensions
     {
         public static IServiceCollection AddDependencyHealthChecks(this IServiceCollection services, IConfiguration configuration)
         {
-            // 1: Retrieve SQL Server connection string from configuration, fail fast if missing
-            var sqlConnectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
-
-            // 2: Retrieve Redis connection string from configuration, fail fast if missing
-            var redisConnectionString = configuration["Redis:ConnectionString"]
-                ?? throw new InvalidOperationException("Configuration value 'Redis:ConnectionString' is not configured.");
-
-            // 3: Bind RabbitMQ settings from configuration section, ensure valid configuration
-            var rabbitMqSettings = configuration.GetSection(RabbitMqSettings.SectionName).Get<RabbitMqSettings>()
-                ?? throw new InvalidOperationException($"Configuration section '{RabbitMqSettings.SectionName}' is missing or invalid.");
-
-            // 4: Build RabbitMQ connection string from strongly typed settings
-            var rabbitMqConnectionString = BuildRabbitMqConnectionString(rabbitMqSettings);
-
-            // 5: Register health checks for all external dependencies (SQL Server, Redis, RabbitMQ)
+            // Register health checks for all external dependencies (database, cache, messaging)
             services.AddHealthChecks()
+
+                // 1: SQL Server health check using connection string from configuration
                 .AddSqlServer(
-                    connectionString: sqlConnectionString,
+                    connectionStringFactory: _ =>
+                        configuration.GetConnectionString("DefaultConnection")
+                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured."),
                     name: "sqlserver",
                     failureStatus: HealthStatus.Unhealthy,
                     tags: ["db"])
+
+                // 2: Resolves RedisOptions via DI and verifies broker connectivity
                 .AddRedis(
-                    redisConnectionString: redisConnectionString,
+                    connectionStringFactory: sp => sp.GetRequiredService<IOptions<RedisOptions>>().Value.ConnectionString,
                     name: "redis",
                     failureStatus: HealthStatus.Unhealthy,
                     tags: ["cache"])
+
+                // 3: Builds the connection string from RabbitMqOptions resolved via DI and attempts to connect
                 .AddRabbitMQ(
                     factory: sp =>
                     {
-                        // 6: Create RabbitMQ connection using connection string for health probe
+                        var rabbitOptions = sp.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+
+                        var rabbitMqConnectionString = BuildRabbitMqConnectionString(rabbitOptions);
+
                         var factory = new ConnectionFactory
                         {
                             Uri = new Uri(rabbitMqConnectionString)
                         };
 
+                        // Create connection to validate RabbitMQ availability
                         return factory.CreateConnectionAsync().GetAwaiter().GetResult();
                     },
                     name: "rabbitmq",
@@ -53,20 +51,20 @@ namespace PayFlow.API.Extensions
             return services;
         }
 
-        private static string BuildRabbitMqConnectionString(RabbitMqSettings settings)
+        private static string BuildRabbitMqConnectionString(RabbitMqOptions options)
         {
             // 1: Encode credentials and virtual host to ensure valid URI format
-            var userName = Uri.EscapeDataString(settings.UserName);
-            var password = Uri.EscapeDataString(settings.Password);
+            var userName = Uri.EscapeDataString(options.UserName);
+            var password = Uri.EscapeDataString(options.Password);
 
             // 2: Normalize and encode virtual host (default "/" must be encoded as "%2F")
-            var virtualHost = settings.VirtualHost.Trim('/');
+            var virtualHost = options.VirtualHost.Trim('/');
             var encodedVirtualHost = string.IsNullOrWhiteSpace(virtualHost)
                 ? "%2F"
                 : Uri.EscapeDataString(virtualHost);
 
             // 3: Construct AMQP connection string
-            return $"amqp://{userName}:{password}@{settings.HostName}:{settings.Port}/{encodedVirtualHost}";
+            return $"amqp://{userName}:{password}@{options.HostName}:{options.Port}/{encodedVirtualHost}";
         }
     }
 }

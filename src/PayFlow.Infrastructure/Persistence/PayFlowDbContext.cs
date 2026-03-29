@@ -17,6 +17,8 @@ namespace PayFlow.Infrastructure.Persistence
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
+        public DbSet<OutboxMessage> OutboxMessages { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Automatically picks up all IEntityTypeConfiguration<T> classes

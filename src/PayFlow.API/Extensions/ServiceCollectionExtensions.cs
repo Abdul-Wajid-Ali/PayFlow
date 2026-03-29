@@ -1,16 +1,15 @@
-﻿using System.Text;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Text.Json.Serialization;
-using System.Threading.RateLimiting;
-using System.Threading.RateLimiting;
-using Asp.Versioning;
+﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using PayFlow.API.Constants;
 using PayFlow.API.ExceptionHandlers;
 using PayFlow.API.RateLimiting;
-using PayFlow.Infrastructure.Configuration;
+using PayFlow.Infrastructure.Options;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 
 namespace PayFlow.API.Extensions
 {
@@ -46,63 +45,82 @@ namespace PayFlow.API.Extensions
             services.AddExceptionHandler<BusinessRuleExceptionHandler>();
             services.AddExceptionHandler<IdempotencyConflictExceptionHandler>();
 
-            // 5: Bind JWT settings from configuration
-            var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
-                ?? throw new InvalidOperationException($"Configuration section '{JwtSettings.SectionName}' is missing or invalid.");
+            //5: Bind JwtOptions from appsettings.json and validate at startup
+            services.AddOptions<JwtOptions>()
+                .Bind(configuration.GetSection(JwtOptions.SectionName))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
-            // 6: Add authentication and configure JWT bearer validation
+            // 6: Add authentication services with JWT bearer scheme with default settings (configured later via DI in step 7)
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                    .AddJwtBearer(options =>
-                    {
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuer = true,
-                            ValidateAudience = true,
-                            ValidateLifetime = true,
-                            ValidateIssuerSigningKey = true,
-                            ValidIssuer = jwtSettings.Issuer,
-                            ValidAudience = jwtSettings.Audience,
-                            IssuerSigningKey = new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
-                            ClockSkew = TimeSpan.Zero
-                        };
-                    });
+            }).AddJwtBearer();
 
-            // 7: Add authorization services
+            // 7: Configure JWT authentication by binding JwtOptions and applying them to JwtBearerOptions via DI
+            services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+                .Configure<IOptions<JwtOptions>>((bearerOptions, jwtOptions) =>
+                {
+                    // Get JWT settings from configuration
+                    var options = jwtOptions.Value;
+
+                    // Configure token validation parameters based on JWT settings
+                    bearerOptions.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = options.Issuer,
+                        ValidAudience = options.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.SecretKey)),
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
+
+            // 8: Add authorization services
             services.AddAuthorization();
 
-            // 8: Read and validate transfer rate-limiting settings
-            var transferRateLimitingOptions = configuration
-                .GetSection(TransferRateLimitingOptions.SectionName)
-                .Get<TransferRateLimitingOptions>()
-                 ?? throw new InvalidOperationException($"Configuration section '{TransferRateLimitingOptions.SectionName}' is missing or invalid.");
+            // 9: Register and validate RateLimiting options from configuration
+            services.AddOptions<TransferRateLimitingOptions>()
+                .Bind(configuration.GetSection(TransferRateLimitingOptions.SectionName))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
-            // 9: Add per-user fixed-window rate limiting for transfer endpoint
-            services.AddRateLimiter(options =>
-            {
-                options.OnRejected = TransferRateLimitRejectionHandler.HandleAsync;
+            // 10: Add rate limiting services with default settings (configured later via DI in step 11)
+            services.AddRateLimiter();
 
-                options.AddPolicy(RateLimitPolicies.TransferPolicy, httpContext =>
+            // 11: Configure rate limiting by defining policies and applying TransferRateLimitingOptions via DI
+            services.AddOptions<RateLimiterOptions>()
+                .Configure<IOptions<TransferRateLimitingOptions>>((rateLimiterOptions, rateLimitingOptions) =>
                 {
-                    var userId = httpContext.User.FindFirst("userId")?.Value;
-                    var partitionKey = string.IsNullOrWhiteSpace(userId) ? "missing-uid" : userId;
+                    // Get rate limiting settings from configuration
+                    var options = rateLimitingOptions.Value;
 
-                    return RateLimitPartition.GetFixedWindowLimiter(
-                        partitionKey: partitionKey,
-                        factory: _ => new FixedWindowRateLimiterOptions
-                        {
-                            PermitLimit = transferRateLimitingOptions.PermitLimit,
-                            Window = TimeSpan.FromSeconds(transferRateLimitingOptions.WindowSeconds),
-                            QueueLimit = transferRateLimitingOptions.QueueLimit
-                        });
+                    // Set a global rejection handler for when requests exceed rate limits
+                    rateLimiterOptions.OnRejected = TransferRateLimitRejectionHandler.HandleAsync;
+
+                    // Define a rate limiting policy for transfer operations, partitioned by user ID
+                    rateLimiterOptions.AddPolicy(RateLimitPolicies.TransferPolicy, httpContext =>
+                    {
+                        var userId = httpContext.User.FindFirst("userId")?.Value;
+
+                        var partitionKey = string.IsNullOrWhiteSpace(userId) ? "missing-uid" : userId;
+
+                        // Use a fixed window rate limiter with settings from configuration, partitioned by user ID
+                        return RateLimitPartition.GetFixedWindowLimiter(
+                            partitionKey,
+                            factory: _ => new FixedWindowRateLimiterOptions
+                            {
+                                PermitLimit = options.PermitLimit,
+                                Window = TimeSpan.FromSeconds(options.WindowSeconds),
+                                QueueLimit = options.QueueLimit
+                            });
+                    });
                 });
-            });
 
-            // 10: Register health checks for core infrastructure dependencies
+            // 12: Register health checks for core infrastructure dependencies
             services.AddDependencyHealthChecks(configuration);
 
             return services;

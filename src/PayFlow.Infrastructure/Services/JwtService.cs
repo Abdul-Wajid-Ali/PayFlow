@@ -3,7 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Common.Models;
 using PayFlow.Domain.Entities;
-using PayFlow.Infrastructure.Configuration;
+using PayFlow.Infrastructure.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -13,10 +13,10 @@ namespace PayFlow.Infrastructure.Services
 {
     public class JwtService : IJwtService
     {
-        private readonly JwtSettings _jwtSettings;
+        private readonly JwtOptions _jwtSettings;
         private readonly IDateTimeProvider _dateTimeProvider;
 
-        public JwtService(IOptions<JwtSettings> settings, IDateTimeProvider dateTimeProvider)
+        public JwtService(IOptions<JwtOptions> settings, IDateTimeProvider dateTimeProvider)
         {
             _jwtSettings = settings.Value;
             _dateTimeProvider = dateTimeProvider;
