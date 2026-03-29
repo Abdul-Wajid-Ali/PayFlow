@@ -25,7 +25,7 @@ namespace PayFlow.Infrastructure.Messaging
             _logger.LogInformation("Outbox worker started. Poll interval: {Interval}s", PollingIntervalSeconds);
 
             // Main loop: iteratively process batches of pending outbox messages until cancellation is requested
-            while (stoppingToken.IsCancellationRequested)
+            while (!stoppingToken.IsCancellationRequested)
             {
                 await ProcessBatchAsync(stoppingToken);
                 await Task.Delay(TimeSpan.FromSeconds(PollingIntervalSeconds), cancellationToken: stoppingToken);

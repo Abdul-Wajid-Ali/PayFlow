@@ -21,6 +21,8 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("NotificationConsumer starting...");
+
             //1: Open a dedicated channel for this consumer — one channel per consumer is the RabbitMQ best practice
             _channel = await _provider.Connection.CreateChannelAsync(cancellationToken: stoppingToken);
 
@@ -39,6 +41,8 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                 //4: Deserialize the message body and extract routing key for dispatch
                 var body = Encoding.UTF8.GetString(args.Body.ToArray());
                 var routingKey = args.RoutingKey;
+
+                _logger.LogDebug("NotificationConsumer received message. RoutingKey: {RoutingKey}", routingKey);
 
                 try
                 {
@@ -64,6 +68,10 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                 queue: RabbitMqTopologyInitializer.NotificationQueue,
                 autoAck: false,
                 cancellationToken: stoppingToken);
+
+            _logger.LogInformation(
+                "NotificationConsumer listening on queue: {Queue}",
+                RabbitMqTopologyInitializer.NotificationQueue);
         }
 
         // Simple dispatch method to simulate different notification types based on routing key
@@ -91,6 +99,8 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
         // Clean up the channel on shutdown — ensures graceful disconnection from the broker
         public override void Dispose()
         {
+            _logger.LogInformation("NotificationConsumer shutting down. Closing channel.");
+
             _channel?.Dispose();
             _channel?.CloseAsync();
             base.Dispose();

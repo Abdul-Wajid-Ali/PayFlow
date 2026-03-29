@@ -58,20 +58,20 @@ namespace PayFlow.Infrastructure.Messaging
 
             // 4a: transfer-processing-queue ← user.registered, transfer.completed (for processing transfers after user registration and transfer completion)
             await channel.QueueBindAsync(
-                queue: TransferProcessingQueue,
+                queue: NotificationQueue,
                 exchange: Exchange,
                 routingKey: DomainEvents.UserRegistered,
                 cancellationToken: cancellationToken);
 
             await channel.QueueBindAsync(
-                queue: TransferProcessingQueue,
+                queue: NotificationQueue,
                 exchange: Exchange,
                 routingKey: DomainEvents.TransferCompleted,
                 cancellationToken: cancellationToken);
 
             // 4b: notification-queue ← transfer.requested (for sending notifications about transfer requests)
             await channel.QueueBindAsync(
-                queue: NotificationQueue,
+                queue: TransferProcessingQueue,
                 exchange: Exchange,
                 routingKey: DomainEvents.TransferRequested,
                 cancellationToken: cancellationToken);
