@@ -10,13 +10,14 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
     public class NotificationConsumer : BackgroundService
     {
         private IChannel? _channel;
-        private readonly IRabbitMqConnectionProvider _provider;
+
+        private readonly IRabbitMqConnectionProvider _connectionProvider;
         private readonly ILogger<NotificationConsumer> _logger;
 
         public NotificationConsumer(ILogger<NotificationConsumer> logger, RabbitMqConnectionManager connectionManager)
         {
             _logger = logger;
-            _provider = connectionManager;
+            _connectionProvider = connectionManager;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -24,7 +25,7 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
             _logger.LogInformation("NotificationConsumer starting...");
 
             //1: Open a dedicated channel for this consumer — one channel per consumer is the RabbitMQ best practice
-            _channel = await _provider.Connection.CreateChannelAsync(cancellationToken: stoppingToken);
+            _channel = await _connectionProvider.Connection.CreateChannelAsync(cancellationToken: stoppingToken);
 
             //2: Limit broker to one unacked message at a time — ensures sequential processing
             await _channel.BasicQosAsync(
@@ -50,7 +51,10 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                     HandleMessage(routingKey, body);
 
                     //6: Ack on success — broker removes the message from the queue
-                    await _channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
+                    await _channel.BasicAckAsync(
+                        deliveryTag: args.DeliveryTag,
+                        multiple: false,
+                        cancellationToken: stoppingToken);
                 }
                 catch (Exception ex)
                 {
@@ -58,7 +62,11 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                         "NotificationConsumer failed to process message. RoutingKey: {RoutingKey}", routingKey);
 
                     //7: Nack without requeue — prevents poison message infinite loop
-                    await _channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: false);
+                    await _channel.BasicNackAsync(
+                        deliveryTag: args.DeliveryTag,
+                        multiple: false,
+                        requeue: false,
+                        cancellationToken: stoppingToken);
                 }
             };
 
@@ -97,12 +105,16 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
         }
 
         // Clean up the channel on shutdown — ensures graceful disconnection from the broker
-        public override void Dispose()
+        public override async void Dispose()
         {
             _logger.LogInformation("NotificationConsumer shutting down. Closing channel.");
 
-            _channel?.Dispose();
-            _channel?.CloseAsync();
+            if (_channel is not null)
+            {
+                await _channel.CloseAsync();
+                _channel.Dispose();
+            }
+
             base.Dispose();
         }
     }

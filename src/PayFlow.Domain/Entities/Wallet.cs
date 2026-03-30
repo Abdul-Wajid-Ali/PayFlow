@@ -35,6 +35,16 @@ namespace PayFlow.Domain.Entities
              Balance = 0.00m
          };
 
+        // Factory method overload to inittialize existing wallet
+        public static Wallet Create(Guid walletId, Guid userId, string currency = "USD", decimal balance = 0.00m)
+         => new()
+         {
+             Id = walletId,
+             UserId = userId,
+             Currency = currency,
+             Balance = balance
+         };
+
         //Domain method - deduct amount from balance
         public void Debit(decimal amount)
         {

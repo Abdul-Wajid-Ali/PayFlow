@@ -41,7 +41,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IEventPublisher, RabbitMqPublisher>();
         services.AddSingleton<IPasswordService, PasswordService>();
-        services.AddTransient<IDateTimeProvider, DateTimeProvider>();
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         // 4: Register EF Core DbContext with SQL Server
@@ -89,6 +89,7 @@ public static class DependencyInjection
         services.AddHostedService(sp => sp.GetRequiredService<RabbitMqConnectionManager>());
         services.AddHostedService<OutboxWorker>();
         services.AddHostedService<NotificationConsumer>();
+        services.AddHostedService<CacheUpdateConsumer>();
 
         return services;
     }

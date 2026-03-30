@@ -1,10 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
+using PayFlow.Application.Common.Constants;
 using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Exceptions;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Features.Transfers.DTOs;
 using PayFlow.Domain.Entities;
+using PayFlow.Domain.Events;
 using System.Net;
+using System.Text.Json;
 
 namespace PayFlow.Application.Features.Transfers.Commands
 {
@@ -16,6 +19,7 @@ namespace PayFlow.Application.Features.Transfers.Commands
         private readonly ITransactionRepository _transactionRepository;
         private readonly ILogger<TransferCommandHandlerV2> _logger;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IOutboxRepository _outboxRepository;
 
         public TransferCommandHandlerV2(
             IUnitOfWork unitOfWork,
@@ -23,7 +27,8 @@ namespace PayFlow.Application.Features.Transfers.Commands
             IWalletRepository walletRepository,
             ITransactionRepository transactionRepository,
             ILogger<TransferCommandHandlerV2> logger,
-            ICurrentUserService currentUserService)
+            ICurrentUserService currentUserService,
+            IOutboxRepository outboxRepository)
         {
             _unitOfWork = unitOfWork;
             _dateTimeProvider = dateTimeProvider;
@@ -31,6 +36,7 @@ namespace PayFlow.Application.Features.Transfers.Commands
             _transactionRepository = transactionRepository;
             _logger = logger;
             _currentUserService = currentUserService;
+            _outboxRepository = outboxRepository;
         }
 
         public async Task<TransferResponse> Handle(TransferCommandV2 command, CancellationToken cancellationToken)
@@ -138,18 +144,44 @@ namespace PayFlow.Application.Features.Transfers.Commands
             //10: Debit amount from sender wallet
             senderWallet.Debit(command.Amount);
 
+            // 10a: Create WalletBalanceChangedEvent for Sender Wallet
+            var senderBalanceEvent = new WalletBalanceChangedEvent(
+                WalletId: senderWallet.Id,
+                UserId: senderWallet.UserId,
+                NewBalance: senderWallet.Balance,
+                Currency: senderWallet.Currency,
+                UpdatedAt: _dateTimeProvider.UtcNow);
+
+            // 10b: Create Outbox Entity for Sender Wallet and commit to OutboxRepository
+            await _outboxRepository.AddAsync(OutboxMessage.Create(
+                eventType: nameof(WalletBalanceChangedEvent),
+                payload: JsonSerializer.Serialize(senderBalanceEvent),
+                routingKey: DomainEvents.WalletBalanceChanged,
+                createdAt: _dateTimeProvider.UtcNow), cancellationToken);
+
             //11: Credit amount to receiver wallet
             receiverWallet.Credit(command.Amount);
+
+            // 11a: Create WalletBalanceChangedEvent for Receiver Wallet
+            var receiverBalanceEvent = new WalletBalanceChangedEvent(
+                WalletId: receiverWallet.Id,
+                UserId: receiverWallet.UserId,
+                NewBalance: receiverWallet.Balance,
+                Currency: receiverWallet.Currency,
+                UpdatedAt: _dateTimeProvider.UtcNow);
+
+            // 11b: Create Outbox Entity for Receiver Wallet and commit to OutboxRepository
+            await _outboxRepository.AddAsync(OutboxMessage.Create(
+                eventType: nameof(WalletBalanceChangedEvent),
+                payload: JsonSerializer.Serialize(receiverBalanceEvent),
+                routingKey: DomainEvents.WalletBalanceChanged,
+                createdAt: _dateTimeProvider.UtcNow), cancellationToken);
 
             //12: Mark transaction as completed
             transaction.MarkCompleted();
 
             //13: Persist changes atomically
             await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            //14: Invalidate wallet balance cache entries after successful commit
-            await _walletRepository.InvalidateBalanceAsync(senderWallet.Id, cancellationToken);
-            await _walletRepository.InvalidateBalanceAsync(receiverWallet.Id, cancellationToken);
 
             _logger.LogInformation(
                 "Transfer completed successfully. TransactionId {TransactionId}, From {FromWalletId} to {ToWalletId}, Amount {Amount} {Currency}",

@@ -13,11 +13,13 @@ namespace PayFlow.Infrastructure.Messaging
 
         private readonly ILogger<OutboxWorker> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IDateTimeProvider _dateTimeProvider;
 
-        public OutboxWorker(ILogger<OutboxWorker> logger, IServiceScopeFactory scopeFactory)
+        public OutboxWorker(ILogger<OutboxWorker> logger, IServiceScopeFactory scopeFactory, IDateTimeProvider dateTimeProvider )
         {
             _logger = logger;
             _scopeFactory = scopeFactory;
+            _dateTimeProvider = dateTimeProvider;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -35,18 +37,17 @@ namespace PayFlow.Infrastructure.Messaging
         private async Task ProcessBatchAsync(CancellationToken cancellationToken)
         {
             // 1: Create a new DI scope for this batch processing to ensure fresh instances of repositories and services
-            var scope = _scopeFactory.CreateScope();
+            using var scope = _scopeFactory.CreateScope();
 
             // 2: Resolve the dependencies needed for processing the outbox messages
             var outboxRepo = scope.ServiceProvider.GetRequiredService<IOutboxRepository>();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var publisher = scope.ServiceProvider.GetRequiredService<IEventPublisher>();
-            var dateTimeProvider = scope.ServiceProvider.GetRequiredService<IDateTimeProvider>();
 
             // 3: Fetch pending outbox messages that are due for processing and return immediately if there are none
             var pendingMessages = await outboxRepo.GetPendingAsync(
                 batchSize: BatchSize,
-                dateTimeNow: dateTimeProvider.UtcNow,
+                dateTimeNow: _dateTimeProvider.UtcNow,
                 cancellationToken);
 
             if (pendingMessages.Count == 0)
@@ -65,7 +66,7 @@ namespace PayFlow.Infrastructure.Messaging
                         cancellationToken: cancellationToken);
 
                     // 4b: If publish succeeds, mark the message as processed with the current timestamp
-                    item.MarkAsProcessed(dateTimeProvider.UtcNow);
+                    item.MarkAsProcessed(_dateTimeProvider.UtcNow);
 
                     _logger.LogInformation("Outbox message published. Id: {Id}, EventType: {EventType}, RoutingKey: {RoutingKey}",
                         item.Id, item.EventType, item.RoutingKey);
@@ -76,7 +77,7 @@ namespace PayFlow.Infrastructure.Messaging
                     item.RecordFailure(
                         errorMessage: ex.Message,
                         maxTries: MaxRetries,
-                        dateTimeNow: dateTimeProvider.UtcNow);
+                        dateTimeNow: _dateTimeProvider.UtcNow);
 
                     // 4d: Log a warning if the message will be retried, or an error if it has been dead-lettered after exceeding max retries
                     if (item.DeadLetteredAt.HasValue)

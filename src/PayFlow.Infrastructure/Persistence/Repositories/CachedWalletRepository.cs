@@ -9,7 +9,7 @@ namespace PayFlow.Infrastructure.Persistence.Repositories
 {
     public class CachedWalletRepository : IWalletRepository
     {
-        private static readonly TimeSpan BalanceCacheTtl = TimeSpan.FromSeconds(60);
+        private static readonly TimeSpan BalanceCacheTtl = TimeSpan.FromSeconds(120 + Random.Shared.Next(0, 15));
         private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
         private readonly WalletRepository _innerRepository;
@@ -65,21 +65,17 @@ namespace PayFlow.Infrastructure.Persistence.Repositories
             return balanceDto;
         }
 
-        public async Task InvalidateBalanceAsync(Guid walletId, CancellationToken cancellationToken)
+        public async Task UpdateBalanceCacheAsync(Wallet wallet, CancellationToken cancellationToken = default)
         {
-            try
-            {
-                // Removes wallet balance cache entry
-                var balanceKey = GetBalanceKey(walletId);
-                await _distributedCache.RemoveAsync(balanceKey, cancellationToken);
+            // 1: Create BalanceDTO later to be passed to set in cache.
+            var balanceDto = new WalletBalanceResponse(
+                WalletId: wallet.Id,
+                UserId: wallet.UserId,
+                Balance:wallet.Balance,
+                Currency: wallet.Currency);
 
-                _logger.LogInformation("CACHE INVALIDATED for {BalanceKey}", balanceKey);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "CACHE INVALIDATION FAILURE for WalletId {WalletId}", walletId);
-                // Redis failure — silently continue
-            }
+            // 2: Set the DTO in redis cache for later use.
+            await CacheBalanceAsync(balanceDto, wallet.UserId, cancellationToken);
         }
 
         // Generates cache key for wallet balance
