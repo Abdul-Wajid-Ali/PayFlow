@@ -8,6 +8,7 @@ using PayFlow.Domain.Entities;
 using PayFlow.Domain.Events;
 using System.Net;
 using System.Text.Json;
+using System.Transactions;
 
 namespace PayFlow.Application.Features.Transfers.Commands
 {
@@ -130,7 +131,7 @@ namespace PayFlow.Application.Features.Transfers.Commands
             }
 
             //9: Create transaction as pending
-            var transaction = Transaction.Create(
+            var transaction = Domain.Entities.Transaction.Create(
                  fromWalletId: senderWallet.Id,
                  toWalletId: receiverWallet.Id,
                  amount: command.Amount,
@@ -153,11 +154,13 @@ namespace PayFlow.Application.Features.Transfers.Commands
                 UpdatedAt: _dateTimeProvider.UtcNow);
 
             // 10b: Create Outbox Entity for Sender Wallet and commit to OutboxRepository
-            await _outboxRepository.AddAsync(OutboxMessage.Create(
-                eventType: nameof(WalletBalanceChangedEvent),
-                payload: JsonSerializer.Serialize(senderBalanceEvent),
-                routingKey: DomainEvents.WalletBalanceChanged,
-                createdAt: _dateTimeProvider.UtcNow), cancellationToken);
+            await _outboxRepository.AddAsync(
+                OutboxMessage.Create(
+                    eventType: nameof(WalletBalanceChangedEvent),
+                    payload: JsonSerializer.Serialize(senderBalanceEvent),
+                    routingKey: DomainEvents.WalletBalanceChanged,
+                    createdAt: _dateTimeProvider.UtcNow), 
+                cancellationToken);
 
             //11: Credit amount to receiver wallet
             receiverWallet.Credit(command.Amount);
@@ -171,14 +174,34 @@ namespace PayFlow.Application.Features.Transfers.Commands
                 UpdatedAt: _dateTimeProvider.UtcNow);
 
             // 11b: Create Outbox Entity for Receiver Wallet and commit to OutboxRepository
-            await _outboxRepository.AddAsync(OutboxMessage.Create(
-                eventType: nameof(WalletBalanceChangedEvent),
-                payload: JsonSerializer.Serialize(receiverBalanceEvent),
-                routingKey: DomainEvents.WalletBalanceChanged,
-                createdAt: _dateTimeProvider.UtcNow), cancellationToken);
+            await _outboxRepository.AddAsync(
+                OutboxMessage.Create(
+                    eventType: nameof(WalletBalanceChangedEvent),
+                    payload: JsonSerializer.Serialize(receiverBalanceEvent),
+                    routingKey: DomainEvents.WalletBalanceChanged,
+                    createdAt: _dateTimeProvider.UtcNow), 
+                cancellationToken);
 
             //12: Mark transaction as completed
             transaction.MarkCompleted();
+
+            // 12a: Create TransferCompletedEvent for Transfer Completed Notification
+            var transferCompleteEvent = new TransferCompletedEvent(
+                TransactionId: transaction.Id,
+                FromWalletId: senderWallet.Id,
+                ToWalletId: receiverWallet.Id,
+                Amount: command.Amount,
+                Currency: command.Currency,
+                CompletedAt: transaction.CreatedAt);
+
+            // 12b: Create Outbox Entity for Transfer Completed and commit to OutboxRepository
+            await _outboxRepository.AddAsync(
+                OutboxMessage.Create(
+                    eventType: nameof(TransferCompletedEvent),
+                    payload: JsonSerializer.Serialize(transferCompleteEvent),
+                    routingKey: DomainEvents.TransferCompleted,
+                    createdAt: _dateTimeProvider.UtcNow), 
+                cancellationToken);
 
             //13: Persist changes atomically
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -190,7 +213,7 @@ namespace PayFlow.Application.Features.Transfers.Commands
             return MapToResponse(transaction);
         }
 
-        private static TransferResponse MapToResponse(Transaction transaction) =>
+        private static TransferResponse MapToResponse(Domain.Entities.Transaction transaction) =>
            new(
                TransactionId: transaction.Id,
                FromWalletId: transaction.FromWalletId,

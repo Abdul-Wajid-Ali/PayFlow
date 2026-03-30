@@ -139,11 +139,13 @@ namespace PayFlow.Application.Features.Transfers.Commands
                 UpdatedAt: _dateTimeProvider.UtcNow);
 
             // 8b: Create Outbox Entity for Sender Wallet and commit to OutboxRepository
-            await _outboxRepository.AddAsync(OutboxMessage.Create(
-                eventType: nameof(WalletBalanceChangedEvent),
-                payload: JsonSerializer.Serialize(senderBalanceEvent),
-                routingKey: DomainEvents.WalletBalanceChanged,
-                createdAt: _dateTimeProvider.UtcNow), cancellationToken);
+            await _outboxRepository.AddAsync(
+                OutboxMessage.Create(
+                    eventType: nameof(WalletBalanceChangedEvent),
+                    payload: JsonSerializer.Serialize(senderBalanceEvent),
+                    routingKey: DomainEvents.WalletBalanceChanged,
+                    createdAt: _dateTimeProvider.UtcNow), 
+                cancellationToken);
 
             // 9: Credit amount to receiver wallet
             receiverWallet.Credit(command.Amount);
@@ -157,14 +159,34 @@ namespace PayFlow.Application.Features.Transfers.Commands
                 UpdatedAt: _dateTimeProvider.UtcNow);
 
             // 9b: Create Outbox Entity for Receiver Wallet and commit to OutboxRepository
-            await _outboxRepository.AddAsync(OutboxMessage.Create(
-                eventType: nameof(WalletBalanceChangedEvent),
-                payload: JsonSerializer.Serialize(receiverBalanceEvent),
-                routingKey: DomainEvents.WalletBalanceChanged,
-                createdAt: _dateTimeProvider.UtcNow), cancellationToken);
+            await _outboxRepository.AddAsync(
+                OutboxMessage.Create(
+                    eventType: nameof(WalletBalanceChangedEvent),
+                    payload: JsonSerializer.Serialize(receiverBalanceEvent),
+                    routingKey: DomainEvents.WalletBalanceChanged,
+                    createdAt: _dateTimeProvider.UtcNow), 
+                cancellationToken);
 
             // 10: Mark transaction as completed
             transaction.MarkCompleted();
+
+            // 10a: Create TransferCompletedEvent for Transfer Completed Notification
+            var transferCompleteEvent = new TransferCompletedEvent(
+                TransactionId: transaction.Id,
+                FromWalletId: senderWallet.Id,
+                ToWalletId: receiverWallet.Id,
+                Amount: command.Amount,
+                Currency: command.Currency,
+                CompletedAt: transaction.CreatedAt);
+
+            // 10b: Create Outbox Entity for Transfer Completed and commit to OutboxRepository
+            await _outboxRepository.AddAsync(
+                OutboxMessage.Create(
+                    eventType: nameof(TransferCompletedEvent),
+                    payload: JsonSerializer.Serialize(transferCompleteEvent),
+                    routingKey: DomainEvents.TransferCompleted,
+                    createdAt: _dateTimeProvider.UtcNow),
+                cancellationToken);
 
             // 11: Presist changes atomically
             await _unitOfWork.SaveChangesAsync(cancellationToken);
