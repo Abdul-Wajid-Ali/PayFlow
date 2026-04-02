@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PayFlow.Application.Common.Interfaces;
 using PayFlow.Infrastructure.Messaging;
@@ -26,16 +25,10 @@ public static class DependencyInjection
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IOutboxRepository, OutboxRepository>();
-        services.AddScoped<WalletRepository>(); // Register the concrete inner repository directly
+        services.AddScoped<IWalletRepository, WalletRepository>();
 
-        // 2: Register cache service and decorator
+        // 2: Register wallet cache service
         services.AddScoped<IWalletCacheService, WalletCacheService>();
-        services.AddScoped<IWalletRepository>(sp =>
-        new CachedWalletRepository(
-            sp.GetRequiredService<WalletRepository>(),
-            sp.GetRequiredService<IWalletCacheService>(),
-            sp.GetRequiredService<ILogger<CachedWalletRepository>>())
-        );
 
         // 3: Register infrastructure services (JWT, password hashing, time provider)
         services.AddScoped<IJwtService, JwtService>();
