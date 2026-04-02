@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PayFlow.Application.Common.Interfaces;
-using PayFlow.Domain.Entities;
+using PayFlow.Application.Features.Wallet.DTOs;
 using PayFlow.Domain.Events;
 using PayFlow.Infrastructure.Messaging.Connection;
 using RabbitMQ.Client;
@@ -100,14 +100,16 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
             // 3: Create a new DI scope for this batch processing to ensure fresh instances of WalletRepository
             using var scope = _scopeFactory.CreateScope();
 
-            var walletRepo = scope.ServiceProvider.GetRequiredService<IWalletRepository>();
+            var cacheService = scope.ServiceProvider.GetRequiredService<IWalletCacheService>();
 
             // 4: Updating Redis cache with new balance
-            await walletRepo.UpdateBalanceCacheAsync(Wallet.Create(
-                walletId: balanceChangedEvent.WalletId,
-                userId: balanceChangedEvent.UserId,
-                currency: balanceChangedEvent.Currency,
-                balance: balanceChangedEvent.NewBalance), cancellationToken: stoppingToken);
+            var balanceDto = new WalletBalanceResponse(
+                WalletId: balanceChangedEvent.WalletId,
+                UserId: balanceChangedEvent.UserId,
+                Balance: balanceChangedEvent.NewBalance,
+                Currency: balanceChangedEvent.Currency);
+
+            await cacheService.SetBalanceAsync(balanceDto, balanceChangedEvent.UserId, stoppingToken);
 
             _logger.LogInformation(
             "[CACHE UPDATE] Balance updated for WalletId {WalletId}, NewBalance {NewBalance} {Currency}",

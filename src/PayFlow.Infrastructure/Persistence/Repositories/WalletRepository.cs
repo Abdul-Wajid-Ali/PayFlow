@@ -18,9 +18,6 @@ namespace PayFlow.Infrastructure.Persistence.Repositories
         public async Task<Wallet?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
          => await _dbContext.Wallets.FirstOrDefaultAsync(w => w.UserId == userId, cancellationToken);
 
-        public Task UpdateBalanceCacheAsync(Wallet wallet, CancellationToken cancellationToken = default)
-         => Task.CompletedTask;
-
         public async Task<WalletBalanceResponse?> GetBalanceDtoByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
             => await _dbContext.Wallets
             .Where(w => w.UserId == userId)

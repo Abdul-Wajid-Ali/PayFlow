@@ -10,7 +10,5 @@ namespace PayFlow.Application.Common.Interfaces
         Task AddAsync(Wallet wallet, CancellationToken cancellationToken = default);
 
         Task<WalletBalanceResponse?> GetBalanceDtoByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
-
-        Task UpdateBalanceCacheAsync(Wallet wallet, CancellationToken cancellationToken = default);
     }
 }

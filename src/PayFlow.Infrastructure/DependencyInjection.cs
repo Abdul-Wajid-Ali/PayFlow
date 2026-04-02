@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,11 +28,12 @@ public static class DependencyInjection
         services.AddScoped<IOutboxRepository, OutboxRepository>();
         services.AddScoped<WalletRepository>(); // Register the concrete inner repository directly
 
-        // 2: Decorator: IWalletRepository → CachedWalletRepository wrapping WalletRepository
+        // 2: Register cache service and decorator
+        services.AddScoped<IWalletCacheService, WalletCacheService>();
         services.AddScoped<IWalletRepository>(sp =>
         new CachedWalletRepository(
             sp.GetRequiredService<WalletRepository>(),
-            sp.GetRequiredService<IDistributedCache>(),
+            sp.GetRequiredService<IWalletCacheService>(),
             sp.GetRequiredService<ILogger<CachedWalletRepository>>())
         );
 
