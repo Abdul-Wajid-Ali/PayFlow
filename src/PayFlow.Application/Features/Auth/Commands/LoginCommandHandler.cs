@@ -5,6 +5,7 @@ using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Features.Auth.DTOs;
 using PayFlow.Domain.Entities;
 using PayFlow.Domain.Enums;
+using PayFlow.Domain.Interfaces;
 using System.Net;
 
 namespace PayFlow.Application.Features.Auth.Commands

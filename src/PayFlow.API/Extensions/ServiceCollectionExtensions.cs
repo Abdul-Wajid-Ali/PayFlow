@@ -6,6 +6,8 @@ using Microsoft.IdentityModel.Tokens;
 using PayFlow.API.Constants;
 using PayFlow.API.ExceptionHandlers;
 using PayFlow.API.RateLimiting;
+using PayFlow.API.Services;
+using PayFlow.Application.Common.Interfaces;
 using PayFlow.Infrastructure.Options;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -22,6 +24,7 @@ namespace PayFlow.API.Extensions
             services.AddOpenApi();
             services.AddProblemDetails();
             services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             // 2: Register controllers and configure JSON serialization
             services.AddControllers().AddJsonOptions(options =>

@@ -1,8 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PayFlow.Application.Common.Interfaces;
-using PayFlow.Domain.Entities;
+using PayFlow.Application.Common.Models;
 using PayFlow.Domain.Events;
 using PayFlow.Infrastructure.Messaging.Connection;
 using RabbitMQ.Client;
@@ -17,16 +16,16 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
         private IChannel? _channel;
 
         private readonly ILogger _logger;
-        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly IWalletCacheService _cacheService;
         private readonly IRabbitMqConnectionProvider _connectionProvider;
 
         public CacheUpdateConsumer(
-            IServiceScopeFactory scopeFactory,
+            IWalletCacheService cacheService,
             ILogger<CacheUpdateConsumer> logger,
             RabbitMqConnectionManager connectionManager)
         {
             _logger = logger;
-            _scopeFactory = scopeFactory;
+            _cacheService = cacheService;
             _connectionProvider = connectionManager;
         }
 
@@ -97,17 +96,17 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                 return;
             }
 
-            // 3: Create a new DI scope for this batch processing to ensure fresh instances of WalletRepository
-            using var scope = _scopeFactory.CreateScope();
-
-            var walletRepo = scope.ServiceProvider.GetRequiredService<IWalletRepository>();
-
             // 4: Updating Redis cache with new balance
-            await walletRepo.UpdateBalanceCacheAsync(Wallet.Create(
-                walletId: balanceChangedEvent.WalletId,
+            await _cacheService.SetBalanceAsync(
+                result: new WalletCacheResult(
+                        WalletId: balanceChangedEvent.WalletId,
+                        UserId: balanceChangedEvent.UserId,
+                        Currency: balanceChangedEvent.Currency,
+                        Balance: balanceChangedEvent.NewBalance
+                    ),
                 userId: balanceChangedEvent.UserId,
-                currency: balanceChangedEvent.Currency,
-                balance: balanceChangedEvent.NewBalance), cancellationToken: stoppingToken);
+                cancellationToken: stoppingToken
+            );
 
             _logger.LogInformation(
             "[CACHE UPDATE] Balance updated for WalletId {WalletId}, NewBalance {NewBalance} {Currency}",

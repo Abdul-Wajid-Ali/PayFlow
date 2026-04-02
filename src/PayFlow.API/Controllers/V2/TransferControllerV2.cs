@@ -28,11 +28,10 @@ namespace PayFlow.API.Controllers.V2
         [HttpPost]
         [MapToApiVersion("2.0")]
         [EnableRateLimiting(RateLimitPolicies.TransferPolicy)]
-        [ProducesResponseType(typeof(TransferResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(TransferAcceptedResponse), StatusCodes.Status202Accepted)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> TransferV2(
             [FromBody] TransferRequest request,
@@ -49,7 +48,7 @@ namespace PayFlow.API.Controllers.V2
                 });
 
             // Create TransferCommand from the request
-            var command = new TransferCommand(
+            var command = new TransferCommandV2(
                 SenderUserId: _currentUser.UserId,
                 ReceiverUserId: request.ReceiverUserId,
                 Amount: request.Amount,

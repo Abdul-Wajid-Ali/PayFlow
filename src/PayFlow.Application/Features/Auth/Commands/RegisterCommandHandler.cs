@@ -6,6 +6,7 @@ using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Features.Auth.DTOs;
 using PayFlow.Domain.Entities;
 using PayFlow.Domain.Events;
+using PayFlow.Domain.Interfaces;
 using System.Net;
 using System.Text.Json;
 

@@ -2,6 +2,7 @@
 using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Exceptions;
 using PayFlow.Application.Common.Interfaces;
+using PayFlow.Domain.Interfaces;
 using System.Net;
 
 namespace PayFlow.Application.Features.Auth.Commands

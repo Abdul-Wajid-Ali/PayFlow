@@ -8,6 +8,7 @@ namespace PayFlow.Infrastructure.Persistence.Repositories
     {
         private readonly PayFlowDbContext _dbContext;
 
+
         public RefreshTokenRepository(PayFlowDbContext dbContext)
             => _dbContext = dbContext;
 

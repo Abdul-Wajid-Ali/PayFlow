@@ -1,4 +1,4 @@
-﻿namespace PayFlow.Application.Common.Interfaces
+﻿namespace PayFlow.Domain.Interfaces
 {
     public interface IUnitOfWork
     {

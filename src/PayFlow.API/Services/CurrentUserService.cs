@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using PayFlow.Application.Common.Interfaces;
+﻿using PayFlow.Application.Common.Interfaces;
 
-namespace PayFlow.Infrastructure.Services
+namespace PayFlow.API.Services
 {
     public class CurrentUserService : ICurrentUserService
     {

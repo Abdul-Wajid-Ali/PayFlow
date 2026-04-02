@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Exceptions;
-using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Features.Wallet.DTOs;
+using PayFlow.Domain.Interfaces;
 using System.Net;
 
 namespace PayFlow.Application.Features.Wallet.Queries
@@ -27,8 +27,8 @@ namespace PayFlow.Application.Features.Wallet.Queries
                 query.UserId);
 
             //1: Validate wallet existence and throw BusinessRuleException if not found
-            var balanceDto = await _walletRepository.GetBalanceDtoByUserIdAsync(query.UserId, cancellationToken);
-            if (balanceDto is null)
+            var wallet = await _walletRepository.GetByUserIdAsync(query.UserId, cancellationToken);
+            if (wallet is null)
             {
                 _logger.LogWarning(
                     "Balance retrieval failed: wallet not found for UserId {UserId}",
@@ -42,13 +42,18 @@ namespace PayFlow.Application.Features.Wallet.Queries
 
             _logger.LogInformation(
                 "Balance retrieved successfully for UserId {UserId}. WalletId {WalletId}, Balance {Balance} {Currency}",
-                balanceDto.UserId,
-                balanceDto.WalletId,
-                balanceDto.Balance,
-                balanceDto.Currency);
+                wallet.UserId,
+                wallet.Id,
+                wallet.Balance,
+                wallet.Currency);
 
             //2: Return WalletBalanceResponse DTO
-            return balanceDto;
+            return new WalletBalanceResponse(
+                WalletId: wallet.Id,
+                UserId: wallet.UserId,
+                Balance: wallet.Balance,
+                Currency: wallet.Currency
+            );
         }
     }
 }

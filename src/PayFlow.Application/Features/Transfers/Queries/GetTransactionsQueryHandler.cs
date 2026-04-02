@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using PayFlow.Application.Common.CQRS;
 using PayFlow.Application.Common.Exceptions;
-using PayFlow.Application.Common.Interfaces;
 using PayFlow.Application.Common.Models;
 using PayFlow.Application.Features.Transfers.DTOs;
+using PayFlow.Domain.Interfaces;
 using System.Net;
 
 namespace PayFlow.Application.Features.Transfers.Queries

@@ -1,4 +1,5 @@
 ﻿using PayFlow.Application.Common.Interfaces;
+using PayFlow.Domain.Interfaces;
 
 namespace PayFlow.Infrastructure.Persistence
 {

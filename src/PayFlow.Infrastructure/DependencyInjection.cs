@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PayFlow.Application.Common.Interfaces;
+using PayFlow.Domain.Interfaces;
 using PayFlow.Infrastructure.Messaging;
 using PayFlow.Infrastructure.Messaging.Connection;
 using PayFlow.Infrastructure.Messaging.Consumers;
@@ -33,8 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IWalletRepository>(sp =>
         new CachedWalletRepository(
             sp.GetRequiredService<WalletRepository>(),
-            sp.GetRequiredService<IDistributedCache>(),
-            sp.GetRequiredService<ILogger<CachedWalletRepository>>())
+            sp.GetRequiredService<IWalletCacheService>())
         );
 
         // 3: Register infrastructure services (JWT, password hashing, time provider)
@@ -42,7 +40,7 @@ public static class DependencyInjection
         services.AddScoped<IEventPublisher, RabbitMqPublisher>();
         services.AddSingleton<IPasswordService, PasswordService>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddSingleton<IWalletCacheService, WalletCacheService>();
 
         // 4: Register EF Core DbContext with SQL Server
         services.AddDbContext<PayFlowDbContext>(options =>
