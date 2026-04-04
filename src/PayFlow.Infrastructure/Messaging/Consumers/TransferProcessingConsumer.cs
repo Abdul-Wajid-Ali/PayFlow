@@ -224,10 +224,10 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
             senderWallet.Debit(requestedEvent.Amount);
             receiverWallet.Credit(requestedEvent.Amount);
 
-            // 11: Mark transaction as successfully completed
+            // 13: Mark transaction as successfully completed
             transaction.MarkCompleted();
 
-            // 12: Create TransferCompleted domain event
+            // 14: Create TransferCompleted domain event
             var completedEvent = new TransferCompletedEvent(
                 TransactionId: transaction.Id,
                 FromWalletId: transaction.FromWalletId,
@@ -236,7 +236,7 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                 Currency: transaction.Currency,
                 CompletedAt: _dateTimeProvider.UtcNow);
 
-            // 13: Persist TransferCompleted event to outbox
+            // 15: Persist TransferCompleted event to outbox
             await outboxRepo.AddAsync(
                 message: OutboxMessage.Create(
                     eventType: DomainEvents.TransferCompleted,
@@ -245,7 +245,7 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                     createdAt: _dateTimeProvider.UtcNow),
                 cancellationToken: ct);
 
-            // 14: Create sender wallet balance changed event
+            // 16: Create sender wallet balance changed event
             var senderBalanceEvent = new WalletBalanceChangedEvent(
                 WalletId: senderWallet.Id,
                 UserId: senderWallet.UserId,
@@ -253,7 +253,7 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                 Currency: senderWallet.Currency,
                 UpdatedAt: completedEvent.CompletedAt);
 
-            // 15: Persist sender balance change event to outbox
+            // 17: Persist sender balance change event to outbox
             await outboxRepo.AddAsync(OutboxMessage.Create(
                     eventType: DomainEvents.WalletBalanceChanged,
                     payload: JsonSerializer.Serialize(senderBalanceEvent),
@@ -261,7 +261,7 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                     createdAt: _dateTimeProvider.UtcNow),
                 cancellationToken: ct);
 
-            // 16: Create receiver wallet balance changed event
+            // 18: Create receiver wallet balance changed event
             var receiverBalanceEvent = new WalletBalanceChangedEvent(
                 WalletId: receiverWallet.Id,
                 UserId: receiverWallet.UserId,
@@ -269,7 +269,7 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                 Currency: receiverWallet.Currency,
                 UpdatedAt: completedEvent.CompletedAt);
 
-            // 17: Persist receiver balance change event to outbox
+            // 19: Persist receiver balance change event to outbox
             await outboxRepo.AddAsync(OutboxMessage.Create(
                     eventType: DomainEvents.WalletBalanceChanged,
                     payload: JsonSerializer.Serialize(receiverBalanceEvent),
@@ -277,10 +277,10 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                     createdAt: _dateTimeProvider.UtcNow),
                 cancellationToken: ct);
 
-            // 18: Commit all DB changes and outbox messages atomically
+            // 20: Commit all DB changes and outbox messages atomically
             await unitOfWork.SaveChangesAsync(ct);
 
-            // 19: Log successful processing and event publishing
+            // 21: Log successful processing and event publishing
             _logger.LogInformation(
                 @"TransferProcessingConsumer: DB committed. 3 outbox messages queued for downstream events.
                  TransactionId: {TransactionId}", transaction.Id);
