@@ -86,8 +86,9 @@ public static class DependencyInjection
         // Register the same instance as a hosted service so the host manages its lifecycle
         services.AddHostedService(sp => sp.GetRequiredService<RabbitMqConnectionManager>());
         services.AddHostedService<OutboxWorker>();
-        services.AddHostedService<NotificationConsumer>();
         services.AddHostedService<CacheUpdateConsumer>();
+        services.AddHostedService<NotificationConsumer>();
+        services.AddHostedService<TransferProcessingConsumer>();
 
         return services;
     }

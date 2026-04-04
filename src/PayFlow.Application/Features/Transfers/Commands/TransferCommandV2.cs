@@ -9,5 +9,5 @@ namespace PayFlow.Application.Features.Transfers.Commands
         decimal Amount,
         string Currency,
         string IdempotencyKey
-    ) : ICommand<TransferResponse>;
+    ) : ICommand<TransferAcceptedResponse>;
 }

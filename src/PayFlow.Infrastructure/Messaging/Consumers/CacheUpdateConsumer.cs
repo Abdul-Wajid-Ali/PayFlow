@@ -56,11 +56,14 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
 
                 try
                 {
-                    //5: Process the message — dispatch based on routing key
+                    //5: Process the message — dispatch
                     await HandleMessageAsync(body, stoppingToken);
 
                     //6: Ack on success — broker removes the message from the queue
                     await _channel.BasicAckAsync(deliveryTag: args.DeliveryTag, multiple: false, cancellationToken: stoppingToken);
+
+                    _logger.LogInformation(
+                        "CacheUpdateConsumer acknowledged message. DeliveryTag: {DeliveryTag}", args.DeliveryTag);
                 }
                 catch (Exception ex)
                 {
@@ -82,6 +85,13 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                 consumer: consumer,
                 queue: RabbitMqTopologyInitializer.CacheUpdateQueue,
                 cancellationToken: stoppingToken);
+
+            _logger.LogInformation(
+                "CacheUpdateConsumer listening on queue: {Queue}",
+                RabbitMqTopologyInitializer.CacheUpdateQueue);
+
+            //9: Keeps the background service alive indefinitely until a shutdown signal is received via the cancellation token.
+            await Task.Delay(Timeout.Infinite, stoppingToken).ConfigureAwait(false);
         }
 
         private async Task HandleMessageAsync(string payload, CancellationToken stoppingToken)
@@ -96,7 +106,7 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                 return;
             }
 
-            // 4: Updating Redis cache with new balance
+            // 3: Updating Redis cache with new balance
             await _cacheService.SetBalanceAsync(
                 result: new WalletCacheResult(
                         WalletId: balanceChangedEvent.WalletId,

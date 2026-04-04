@@ -20,7 +20,7 @@ namespace PayFlow.Application.Features.Wallet.Queries
             _logger = logger;
         }
 
-        public async Task<WalletBalanceResponse> Handle(GetBalanceQuery query, CancellationToken cancellationToken = default)
+        public async Task<WalletBalanceResponse> Handle(GetBalanceQuery query, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
                 "Balance retrieval initiated for UserId {UserId}",

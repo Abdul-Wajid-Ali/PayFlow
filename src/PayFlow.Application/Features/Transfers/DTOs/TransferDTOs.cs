@@ -25,4 +25,7 @@ namespace PayFlow.Application.Features.Transfers.DTOs
         TransactionStatus Status,
         DateTime CreatedAt,
         string Direction);
+
+    //DTO for returning that the Transfer Request has been accepted.
+    public record TransferAcceptedResponse(Guid TransactionId, TransactionStatus Status);
 }

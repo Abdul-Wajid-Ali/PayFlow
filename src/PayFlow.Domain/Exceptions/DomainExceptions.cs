@@ -1,26 +1,17 @@
 ﻿namespace PayFlow.Domain.Exceptions
 {
     // Base exception for domain-related errors
-    public class DomainException : Exception
+    public class DomainException(string message) : Exception(message)
     {
-        protected DomainException(string message) : base(message)
-        {
-        }
     }
 
     // Custom exception for insufficient balance scenarios
-    public class InsufficientBalanceException : DomainException
+    public class InsufficientBalanceException(string message) : DomainException(message)
     {
-        public InsufficientBalanceException(string message) : base(message)
-        {
-        }
     }
 
     // Custom exception for invalid transfer scenarios
-    public class InvalidTransferException : DomainException
+    public class InvalidTransferException(string message) : DomainException(message)
     {
-        public InvalidTransferException(string message) : base(message)
-        {
-        }
     }
 }

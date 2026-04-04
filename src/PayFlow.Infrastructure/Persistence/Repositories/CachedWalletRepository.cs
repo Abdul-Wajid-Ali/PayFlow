@@ -40,5 +40,8 @@ namespace PayFlow.Infrastructure.Persistence.Repositories
 
             return wallet is not null ? wallet : null;
         }
+
+        public Task<Wallet?> GetByIdAsync(Guid walletId, CancellationToken cancellationToken = default) 
+            => _innerRepository.GetByIdAsync(walletId, cancellationToken);
     }
 }

@@ -59,7 +59,7 @@ namespace PayFlow.API.Controllers.V2
             // Send the query to the handler
             var response = await _sender.Send(command, cancellationToken);
 
-            return CreatedAtAction(nameof(TransferV2), new { id = response.TransactionId }, response);
+            return AcceptedAtAction(nameof(TransferV2), new { id = response.TransactionId }, response);
         }
     }
 }

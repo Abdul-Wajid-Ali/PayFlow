@@ -11,8 +11,8 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
     {
         private IChannel? _channel;
 
-        private readonly IRabbitMqConnectionProvider _connectionProvider;
         private readonly ILogger<NotificationConsumer> _logger;
+        private readonly IRabbitMqConnectionProvider _connectionProvider;
 
         public NotificationConsumer(ILogger<NotificationConsumer> logger, RabbitMqConnectionManager connectionManager)
         {
@@ -55,6 +55,9 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
                         deliveryTag: args.DeliveryTag,
                         multiple: false,
                         cancellationToken: stoppingToken);
+
+                    _logger.LogInformation(
+                        "NotificationConsumer acknowledged message. DeliveryTag: {DeliveryTag}", args.DeliveryTag);
                 }
                 catch (Exception ex)
                 {
@@ -72,14 +75,17 @@ namespace PayFlow.Infrastructure.Messaging.Consumers
 
             //8: Register consumer with the broker — messages start flowing after this call
             await _channel.BasicConsumeAsync(
+                autoAck: false,
                 consumer: consumer,
                 queue: RabbitMqTopologyInitializer.NotificationQueue,
-                autoAck: false,
                 cancellationToken: stoppingToken);
 
             _logger.LogInformation(
                 "NotificationConsumer listening on queue: {Queue}",
                 RabbitMqTopologyInitializer.NotificationQueue);
+
+            //9: Keeps the background service alive indefinitely until a shutdown signal is received via the cancellation token.
+            await Task.Delay(Timeout.Infinite, stoppingToken).ConfigureAwait(false);
         }
 
         // Simple dispatch method to simulate different notification types based on routing key
