@@ -42,17 +42,17 @@ public static class DependencyInjection
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
         services.AddSingleton<IWalletCacheService, WalletCacheService>();
 
-        // 4: Register EF Core DbContext with SQL Server
+        // 4: Register EF Core DbContext with PostgreSQL
         services.AddDbContext<PayFlowDbContext>(options =>
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            options.UseSqlServer(connectionString, sqlOptions =>
+            options.UseNpgsql(connectionString, npgsqlOptions =>
             {
-                sqlOptions.EnableRetryOnFailure(
+                npgsqlOptions.EnableRetryOnFailure(
                     maxRetryCount: 5,
                     maxRetryDelay: TimeSpan.FromSeconds(10),
-                    errorNumbersToAdd: null);
+                    errorCodesToAdd: null);
             });
         });
 

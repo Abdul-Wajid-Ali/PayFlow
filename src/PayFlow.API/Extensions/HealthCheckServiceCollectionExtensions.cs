@@ -12,12 +12,12 @@ namespace PayFlow.API.Extensions
             // Register health checks for all external dependencies (database, cache, messaging)
             services.AddHealthChecks()
 
-                // 1: SQL Server health check using connection string from configuration
-                .AddSqlServer(
+                // 1: PostgreSQL health check using connection string from configuration
+                .AddNpgSql(
                     connectionStringFactory: _ =>
                         configuration.GetConnectionString("DefaultConnection")
                         ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured."),
-                    name: "sqlserver",
+                    name: "postgres",
                     failureStatus: HealthStatus.Unhealthy,
                     tags: ["db"])
 
