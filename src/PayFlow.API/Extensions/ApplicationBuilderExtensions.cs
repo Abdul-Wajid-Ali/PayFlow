@@ -1,10 +1,17 @@
 ﻿using PayFlow.API.Middlewares;
+using PayFlow.Infrastructure.Persistence;
 using Serilog;
 
 namespace PayFlow.API.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
+        // Applies any pending EF Core database migrations before the app starts serving traffic.
+        public static async Task ApplyMigrationsAsync(this WebApplication app)
+        {
+            await DatabaseInitializer.ApplyMigrationsAsync(app.Services);
+        }
+
         // Configures the HTTP request processing pipeline for the API.
         public static WebApplication UseApiPipeline(this WebApplication app)
         {

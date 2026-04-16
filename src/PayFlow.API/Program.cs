@@ -19,8 +19,11 @@ builder.Services
 // 4: Build the application and finalize the service container
 var app = builder.Build();
 
-// 5: Configure the HTTP request processing pipeline (middleware + endpoints)
+// 5: Apply any pending EF Core database migrations before serving traffic
+await app.ApplyMigrationsAsync();
+
+// 6: Configure the HTTP request processing pipeline (middleware + endpoints)
 app.UseApiPipeline();
 
-// 6: Start the web server and begin handling incoming HTTP requests
+// 7: Start the web server and begin handling incoming HTTP requests
 await app.RunAsync();
