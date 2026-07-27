@@ -1,14 +1,3 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Application.Common.Models;
-using PayFlow.Domain.Events;
-using PayFlow.Infrastructure.Messaging.Connection;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using System.Text;
-using System.Text.Json;
-
 namespace PayFlow.Infrastructure.Messaging.Consumers
 {
     public class CacheUpdateConsumer : BackgroundService

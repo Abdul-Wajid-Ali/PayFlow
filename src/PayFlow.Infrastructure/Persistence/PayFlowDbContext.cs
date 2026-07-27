@@ -1,6 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PayFlow.Domain.Entities;
-
 namespace PayFlow.Infrastructure.Persistence
 {
     public class PayFlowDbContext : DbContext

@@ -1,10 +1,3 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using PayFlow.Infrastructure.Messaging.Connection;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using System.Text;
-
 namespace PayFlow.Infrastructure.Messaging.Consumers
 {
     public class NotificationConsumer : BackgroundService

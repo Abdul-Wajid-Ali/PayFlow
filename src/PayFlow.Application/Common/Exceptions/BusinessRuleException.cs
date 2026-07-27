@@ -1,5 +1,3 @@
-﻿using System.Net;
-
 namespace PayFlow.Application.Common.Exceptions
 {
     public class BusinessRuleException : Exception

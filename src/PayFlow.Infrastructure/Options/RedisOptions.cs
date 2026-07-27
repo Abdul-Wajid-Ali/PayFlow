@@ -1,5 +1,3 @@
-﻿using System.ComponentModel.DataAnnotations;
-
 namespace PayFlow.Infrastructure.Options
 {
     public sealed class RedisOptions

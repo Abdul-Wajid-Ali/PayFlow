@@ -1,7 +1,3 @@
-﻿using FluentValidation;
-using MediatR;
-using ValidationException = PayFlow.Application.Common.Exceptions.ValidationException;
-
 namespace PayFlow.Application.Common.Behaviors
 {
     public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>

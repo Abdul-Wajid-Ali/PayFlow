@@ -1,14 +1,3 @@
-﻿using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Application.Common.Models;
-using PayFlow.Domain.Entities;
-using PayFlow.Infrastructure.Options;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-
 namespace PayFlow.Infrastructure.Services
 {
     public class JwtService : IJwtService

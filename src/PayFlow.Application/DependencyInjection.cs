@@ -1,12 +1,3 @@
-﻿using FluentValidation;
-using Microsoft.Extensions.DependencyInjection;
-using PayFlow.Application.Common.Behaviors;
-using PayFlow.Application.Features.Auth.Commands;
-using PayFlow.Application.Features.Auth.Validators;
-using PayFlow.Application.Features.Transfers.Commands;
-using PayFlow.Application.Features.Transfers.Queries;
-using PayFlow.Application.Features.Transfers.Validators;
-
 namespace PayFlow.Application;
 
 public static class DependencyInjection

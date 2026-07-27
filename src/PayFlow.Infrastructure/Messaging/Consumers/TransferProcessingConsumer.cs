@@ -1,19 +1,3 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using PayFlow.Application.Common.Constants;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Domain.Entities;
-using PayFlow.Domain.Enums;
-using PayFlow.Domain.Events;
-using PayFlow.Domain.Exceptions;
-using PayFlow.Domain.Interfaces;
-using PayFlow.Infrastructure.Messaging.Connection;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using System.Text;
-using System.Text.Json;
-
 namespace PayFlow.Infrastructure.Messaging.Consumers
 {
     public class TransferProcessingConsumer : BackgroundService

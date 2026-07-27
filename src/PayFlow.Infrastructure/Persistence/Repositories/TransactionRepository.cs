@@ -1,8 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Domain.Entities;
-using PayFlow.Domain.Interfaces;
-
 namespace PayFlow.Infrastructure.Persistence.Repositories
 {
     public class TransactionRepository : ITransactionRepository

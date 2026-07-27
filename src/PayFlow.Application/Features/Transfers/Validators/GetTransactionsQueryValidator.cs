@@ -1,6 +1,3 @@
-﻿using FluentValidation;
-using PayFlow.Application.Features.Transfers.Queries;
-
 namespace PayFlow.Application.Features.Transfers.Validators
 {
     public class GetTransactionsQueryValidator : AbstractValidator<GetTransactionsQuery>

@@ -1,5 +1,3 @@
-﻿using System.ComponentModel.DataAnnotations;
-
 namespace PayFlow.Infrastructure.Options
 {
     // Represents configuration settings for JWT token generation, validation, and lifetime management.

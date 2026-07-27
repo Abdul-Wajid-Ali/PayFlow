@@ -1,10 +1,3 @@
-﻿using Microsoft.Extensions.Logging;
-using PayFlow.Application.Common.CQRS;
-using PayFlow.Application.Common.Exceptions;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Domain.Interfaces;
-using System.Net;
-
 namespace PayFlow.Application.Features.Auth.Commands
 {
     public class RevokeTokenCommandHandler : ICommandHandler<RevokeTokenCommand, bool>

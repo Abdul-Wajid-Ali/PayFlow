@@ -1,8 +1,3 @@
-﻿using PayFlow.Application.Common.Interfaces;
-using PayFlow.Infrastructure.Messaging.Connection;
-using RabbitMQ.Client;
-using System.Text;
-
 namespace PayFlow.Infrastructure.Messaging
 {
     public class RabbitMqPublisher : IEventPublisher

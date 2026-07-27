@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace PayFlow.Infrastructure.Options
 {
     // Represents RabbitMQ connection configuration used for establishing messaging infrastructure communication.

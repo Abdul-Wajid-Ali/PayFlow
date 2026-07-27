@@ -1,5 +1,3 @@
-﻿using PayFlow.Domain.Enums;
-
 namespace PayFlow.Application.Features.Transfers.DTOs
 {
     //DTO for receiving Transfer Request

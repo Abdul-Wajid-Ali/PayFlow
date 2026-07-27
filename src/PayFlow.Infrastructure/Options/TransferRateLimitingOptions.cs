@@ -1,5 +1,3 @@
-﻿using System.ComponentModel.DataAnnotations;
-
 namespace PayFlow.Infrastructure.Options
 {
     // Defines configuration options controlling rate limiting behavior for transfer operations.

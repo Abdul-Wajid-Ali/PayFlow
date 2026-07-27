@@ -1,5 +1,3 @@
-﻿using MediatR;
-
 namespace PayFlow.Application.Common.CQRS
 {
     // Generic interface for handling queries that return a response of type TResponse.

@@ -1,9 +1,3 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Domain.Interfaces;
-
 namespace PayFlow.Infrastructure.Messaging
 {
     public class OutboxWorker : BackgroundService

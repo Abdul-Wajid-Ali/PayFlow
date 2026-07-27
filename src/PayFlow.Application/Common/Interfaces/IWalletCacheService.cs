@@ -1,5 +1,3 @@
-﻿using PayFlow.Application.Common.Models;
-
 namespace PayFlow.Application.Common.Interfaces
 {
     public interface IWalletCacheService

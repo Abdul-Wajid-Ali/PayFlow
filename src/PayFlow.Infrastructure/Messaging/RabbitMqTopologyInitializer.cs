@@ -1,6 +1,3 @@
-﻿using PayFlow.Application.Common.Constants;
-using RabbitMQ.Client;
-
 namespace PayFlow.Infrastructure.Messaging
 {
     public static class RabbitMqTopologyInitializer

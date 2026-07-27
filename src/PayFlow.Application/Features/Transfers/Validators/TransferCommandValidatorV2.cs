@@ -1,6 +1,3 @@
-﻿using FluentValidation;
-using PayFlow.Application.Features.Transfers.Commands;
-
 namespace PayFlow.Application.Features.Transfers.Validators
 {
     public class TransferCommandValidatorV2 : AbstractValidator<TransferCommandV2>

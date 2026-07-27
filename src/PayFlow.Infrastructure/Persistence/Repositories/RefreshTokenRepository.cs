@@ -1,7 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Domain.Entities;
-
 namespace PayFlow.Infrastructure.Persistence.Repositories
 {
     public class RefreshTokenRepository : IRefreshTokenRepository

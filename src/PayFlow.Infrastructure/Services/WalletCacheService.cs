@@ -1,9 +1,3 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Application.Common.Models;
-using System.Text.Json;
-
 namespace PayFlow.Infrastructure.Services
 {
     public class WalletCacheService : IWalletCacheService

@@ -1,18 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Domain.Interfaces;
-using PayFlow.Infrastructure.Messaging;
-using PayFlow.Infrastructure.Messaging.Connection;
-using PayFlow.Infrastructure.Messaging.Consumers;
-using PayFlow.Infrastructure.Options;
-using PayFlow.Infrastructure.Persistence;
-using PayFlow.Infrastructure.Persistence.Repositories;
-using PayFlow.Infrastructure.Services;
-
 namespace PayFlow.Infrastructure;
 
 public static class DependencyInjection

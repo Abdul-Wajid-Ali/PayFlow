@@ -1,8 +1,3 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using PayFlow.Infrastructure.Options;
-using RabbitMQ.Client;
-
 namespace PayFlow.Infrastructure.Messaging.Connection
 {
     public class RabbitMqConnectionManager : IRabbitMqConnectionProvider, IHostedService

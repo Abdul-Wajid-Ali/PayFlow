@@ -1,7 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PayFlow.Domain.Entities;
-
 namespace PayFlow.Infrastructure.Persistence.Configurations
 {
     public class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage>

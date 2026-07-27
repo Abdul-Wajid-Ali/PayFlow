@@ -1,15 +1,3 @@
-﻿using Microsoft.Extensions.Logging;
-using PayFlow.Application.Common.Constants;
-using PayFlow.Application.Common.CQRS;
-using PayFlow.Application.Common.Exceptions;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Application.Features.Auth.DTOs;
-using PayFlow.Domain.Entities;
-using PayFlow.Domain.Events;
-using PayFlow.Domain.Interfaces;
-using System.Net;
-using System.Text.Json;
-
 namespace PayFlow.Application.Features.Auth.Commands
 {
     public class RegisterCommandHandler : ICommandHandler<RegisterCommand, RegisterResponse>
