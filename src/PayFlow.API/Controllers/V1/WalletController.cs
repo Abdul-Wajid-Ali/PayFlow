@@ -1,15 +1,4 @@
-﻿using Asp.Versioning;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Application.Common.Models;
-using PayFlow.Application.Features.Transfers.DTOs;
-using PayFlow.Application.Features.Transfers.Queries;
-using PayFlow.Application.Features.Wallet.DTOs;
-using PayFlow.Application.Features.Wallet.Queries;
-
-namespace PayFlow.API.Controllers.V1
+﻿namespace PayFlow.API.Controllers.V1
 {
     [Authorize]
     [ApiController]

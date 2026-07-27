@@ -1,6 +1,4 @@
-﻿using Serilog.Context;
-
-namespace PayFlow.API.Middlewares
+﻿namespace PayFlow.API.Middlewares
 {
     public class CorrelationIdMiddleware
     {

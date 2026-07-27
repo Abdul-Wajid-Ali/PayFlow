@@ -1,6 +1,4 @@
-﻿using PayFlow.Application.Common.Interfaces;
-
-namespace PayFlow.API.Services
+﻿namespace PayFlow.API.Services
 {
     public class CurrentUserService : ICurrentUserService
     {

@@ -1,8 +1,3 @@
-using PayFlow.API.Extensions;
-using PayFlow.Application;
-using PayFlow.Infrastructure;
-using Serilog;
-
 // 1: Create the application builder and load configuration, logging, and DI container
 var builder = WebApplication.CreateBuilder(args);
 

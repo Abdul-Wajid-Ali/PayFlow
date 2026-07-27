@@ -1,9 +1,4 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Options;
-using PayFlow.Infrastructure.Options;
-using RabbitMQ.Client;
-
-namespace PayFlow.API.Extensions
+﻿namespace PayFlow.API.Extensions
 {
     public static class HealthCheckServiceCollectionExtensions
     {

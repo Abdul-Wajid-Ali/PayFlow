@@ -1,7 +1,4 @@
-﻿using PayFlow.API.Middlewares;
-using Serilog;
-
-namespace PayFlow.API.Extensions
+﻿namespace PayFlow.API.Extensions
 {
     public static class ApplicationBuilderExtensions
     {

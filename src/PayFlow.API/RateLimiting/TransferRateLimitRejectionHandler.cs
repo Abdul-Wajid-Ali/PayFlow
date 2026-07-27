@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
-using System.Threading.RateLimiting;
-
-namespace PayFlow.API.RateLimiting
+﻿namespace PayFlow.API.RateLimiting
 {
     public static class TransferRateLimitRejectionHandler
     {

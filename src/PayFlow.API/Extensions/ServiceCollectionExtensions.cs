@@ -1,19 +1,4 @@
-﻿using Asp.Versioning;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using PayFlow.API.Constants;
-using PayFlow.API.ExceptionHandlers;
-using PayFlow.API.RateLimiting;
-using PayFlow.API.Services;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Infrastructure.Options;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.RateLimiting;
-
-namespace PayFlow.API.Extensions
+﻿namespace PayFlow.API.Extensions
 {
     public static class ServiceCollectionExtensions
     {

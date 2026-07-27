@@ -1,14 +1,4 @@
-﻿using Asp.Versioning;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
-using PayFlow.API.Constants;
-using PayFlow.Application.Common.Interfaces;
-using PayFlow.Application.Features.Transfers.Commands;
-using PayFlow.Application.Features.Transfers.DTOs;
-
-namespace PayFlow.API.Controllers.V2
+﻿namespace PayFlow.API.Controllers.V2
 {
     [Authorize]
     [ApiController]

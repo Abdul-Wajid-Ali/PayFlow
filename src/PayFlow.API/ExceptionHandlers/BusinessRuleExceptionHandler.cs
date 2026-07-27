@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using PayFlow.Application.Common.Exceptions;
-
-namespace PayFlow.API.ExceptionHandlers
+﻿namespace PayFlow.API.ExceptionHandlers
 {
     public class BusinessRuleExceptionHandler : IExceptionHandler
     {

@@ -1,10 +1,4 @@
-﻿using Asp.Versioning;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using PayFlow.Application.Features.Auth.Commands;
-using PayFlow.Application.Features.Auth.DTOs;
-
-namespace PayFlow.API.Controllers.V1
+﻿namespace PayFlow.API.Controllers.V1
 {
     [ApiController]
     [ApiVersion("1.0")]

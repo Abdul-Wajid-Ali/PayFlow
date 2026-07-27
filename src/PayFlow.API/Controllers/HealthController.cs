@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-
-namespace PayFlow.API.Controllers
+﻿namespace PayFlow.API.Controllers
 {
     [ApiController]
     [Route("health")]
