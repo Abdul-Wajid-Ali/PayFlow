@@ -1,16 +1,11 @@
 ﻿namespace PayFlow.API.ExceptionHandlers
 {
-    public class BusinessRuleExceptionHandler : IExceptionHandler
+    public class BusinessRuleExceptionHandler(
+        ILogger<BusinessRuleExceptionHandler> logger,
+        IProblemDetailsService problemDetailsService) : IExceptionHandler
     {
-        private readonly ILogger<BusinessRuleExceptionHandler> _logger;
-        private readonly IProblemDetailsService _problemDetailsService;
-
-        public BusinessRuleExceptionHandler(ILogger<BusinessRuleExceptionHandler> logger
-            , IProblemDetailsService problemDetailsService)
-        {
-            _logger = logger;
-            _problemDetailsService = problemDetailsService;
-        }
+        private readonly ILogger<BusinessRuleExceptionHandler> _logger = logger;
+        private readonly IProblemDetailsService _problemDetailsService = problemDetailsService;
 
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {

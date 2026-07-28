@@ -1,16 +1,11 @@
 ﻿namespace PayFlow.API.ExceptionHandlers
 {
-    public class ValidationExceptionHandler : IExceptionHandler
+    public class ValidationExceptionHandler(
+        ILogger<ValidationExceptionHandler> logger,
+        IProblemDetailsService problemDetailsService) : IExceptionHandler
     {
-        private readonly ILogger<ValidationExceptionHandler> _logger;
-        private readonly IProblemDetailsService _problemDetailsService;
-
-        public ValidationExceptionHandler(ILogger<ValidationExceptionHandler> logger
-            , IProblemDetailsService problemDetailsService)
-        {
-            _logger = logger;
-            _problemDetailsService = problemDetailsService;
-        }
+        private readonly ILogger<ValidationExceptionHandler> _logger = logger;
+        private readonly IProblemDetailsService _problemDetailsService = problemDetailsService;
 
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {

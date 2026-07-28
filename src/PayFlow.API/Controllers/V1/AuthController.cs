@@ -3,12 +3,9 @@
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/auth")]
-    public class AuthController : ControllerBase
+    public class AuthController(ISender sender) : ControllerBase
     {
-        private readonly ISender _sender;
-
-        public AuthController(ISender sender)
-            => _sender = sender;
+        private readonly ISender _sender = sender;
 
         [HttpPost("register")]
         [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status201Created)]

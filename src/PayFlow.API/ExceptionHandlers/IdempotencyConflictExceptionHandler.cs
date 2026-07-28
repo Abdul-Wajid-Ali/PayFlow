@@ -1,16 +1,11 @@
 ﻿namespace PayFlow.API.ExceptionHandlers
 {
-    public class IdempotencyConflictExceptionHandler : IExceptionHandler
+    public class IdempotencyConflictExceptionHandler(
+        ILogger<IdempotencyConflictExceptionHandler> logger,
+        IProblemDetailsService problemDetailsService) : IExceptionHandler
     {
-        private readonly ILogger<IdempotencyConflictExceptionHandler> _logger;
-        private readonly IProblemDetailsService _problemDetailsService;
-
-        public IdempotencyConflictExceptionHandler(ILogger<IdempotencyConflictExceptionHandler> logger
-            , IProblemDetailsService problemDetailsService)
-        {
-            _logger = logger;
-            _problemDetailsService = problemDetailsService;
-        }
+        private readonly ILogger<IdempotencyConflictExceptionHandler> _logger = logger;
+        private readonly IProblemDetailsService _problemDetailsService = problemDetailsService;
 
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {

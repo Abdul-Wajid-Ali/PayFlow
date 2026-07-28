@@ -1,11 +1,8 @@
 ﻿namespace PayFlow.API.Services
 {
-    public class CurrentUserService : ICurrentUserService
+    public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public CurrentUserService(IHttpContextAccessor httpContextAccessor)
-            => _httpContextAccessor = httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
         // Read the user ID from the "userId" claim in the JWT token. If the claim is not present or cannot be parsed, return Guid.Empty.
         public Guid UserId

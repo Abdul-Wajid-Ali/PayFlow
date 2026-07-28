@@ -4,16 +4,10 @@
     [ApiController]
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/wallet")]
-    public class WalletController : ControllerBase
+    public class WalletController(ISender sender, ICurrentUserService currentUser) : ControllerBase
     {
-        private readonly ISender _sender;
-        private readonly ICurrentUserService _currentUser;
-
-        public WalletController(ISender sender, ICurrentUserService currentUser)
-        {
-            _sender = sender;
-            _currentUser = currentUser;
-        }
+        private readonly ISender _sender = sender;
+        private readonly ICurrentUserService _currentUser = currentUser;
 
         [HttpGet("balance")]
         [ProducesResponseType(typeof(WalletBalanceResponse), StatusCodes.Status200OK)]

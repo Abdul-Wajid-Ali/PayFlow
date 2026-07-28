@@ -4,16 +4,10 @@
     [ApiController]
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/transfer")]
-    public class TransferControllerV2 : ControllerBase
+    public class TransferControllerV2(ISender sender, ICurrentUserService currentUser) : ControllerBase
     {
-        private readonly ISender _sender;
-        private readonly ICurrentUserService _currentUser;
-
-        public TransferControllerV2(ISender sender, ICurrentUserService currentUser)
-        {
-            _sender = sender;
-            _currentUser = currentUser;
-        }
+        private readonly ISender _sender = sender;
+        private readonly ICurrentUserService _currentUser = currentUser;
 
         [HttpPost]
         [MapToApiVersion("2.0")]

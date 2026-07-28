@@ -2,12 +2,9 @@
 {
     [ApiController]
     [Route("health")]
-    public class HealthController : ControllerBase
+    public class HealthController(HealthCheckService healthCheckService) : ControllerBase
     {
-        private readonly HealthCheckService _healthCheckService;
-
-        public HealthController(HealthCheckService healthCheckService)
-            => _healthCheckService = healthCheckService;
+        private readonly HealthCheckService _healthCheckService = healthCheckService;
 
         [HttpGet]
         [ProducesResponseType(typeof(HealthResponse), StatusCodes.Status200OK)]
