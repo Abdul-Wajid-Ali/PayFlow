@@ -8,12 +8,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=5000
-      - ASPNETCORE_HTTPS_PORTS=5001
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PayFlow;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;Encrypt=True;MultipleActiveResultSets=True
       - Redis__ConnectionString=redis:6379
     ports:
       - "5000:5000"
-      - "5001:5001"
     depends_on:
       rabbitmq:
         condition: service_healthy
