@@ -1,12 +1,9 @@
 namespace PayFlow.Infrastructure.Messaging.Connection
 {
-    public class RabbitMqConnectionManager : IRabbitMqConnectionProvider, IHostedService
+    public class RabbitMqConnectionManager(IOptions<RabbitMqOptions> options) : IRabbitMqConnectionProvider, IHostedService
     {
         private IConnection? _connection;
-        private readonly RabbitMqOptions _options;
-
-        public RabbitMqConnectionManager(IOptions<RabbitMqOptions> options)
-            => _options = options.Value;
+        private readonly RabbitMqOptions _options = options.Value;
 
         //1: Expose the connection with a null guard — throws if accessed before StartAsync completes
         public IConnection Connection => _connection

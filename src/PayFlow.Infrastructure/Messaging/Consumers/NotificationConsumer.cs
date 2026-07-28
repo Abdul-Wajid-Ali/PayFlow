@@ -1,17 +1,11 @@
 namespace PayFlow.Infrastructure.Messaging.Consumers
 {
-    public class NotificationConsumer : BackgroundService
+    public class NotificationConsumer(ILogger<NotificationConsumer> logger, RabbitMqConnectionManager connectionManager) : BackgroundService
     {
         private IChannel? _channel;
 
-        private readonly ILogger<NotificationConsumer> _logger;
-        private readonly IRabbitMqConnectionProvider _connectionProvider;
-
-        public NotificationConsumer(ILogger<NotificationConsumer> logger, RabbitMqConnectionManager connectionManager)
-        {
-            _logger = logger;
-            _connectionProvider = connectionManager;
-        }
+        private readonly ILogger<NotificationConsumer> _logger = logger;
+        private readonly IRabbitMqConnectionProvider _connectionProvider = connectionManager;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

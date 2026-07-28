@@ -1,15 +1,9 @@
 namespace PayFlow.Infrastructure.Services
 {
-    public class JwtService : IJwtService
+    public class JwtService(IOptions<JwtOptions> settings, IDateTimeProvider dateTimeProvider) : IJwtService
     {
-        private readonly JwtOptions _jwtSettings;
-        private readonly IDateTimeProvider _dateTimeProvider;
-
-        public JwtService(IOptions<JwtOptions> settings, IDateTimeProvider dateTimeProvider)
-        {
-            _jwtSettings = settings.Value;
-            _dateTimeProvider = dateTimeProvider;
-        }
+        private readonly JwtOptions _jwtSettings = settings.Value;
+        private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
         public JwtTokenResult GenerateToken(User user)
         {

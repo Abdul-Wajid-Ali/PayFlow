@@ -1,17 +1,11 @@
 namespace PayFlow.Infrastructure.Persistence.Repositories
 {
-    public class CachedWalletRepository : IWalletRepository
+    public class CachedWalletRepository(
+        IWalletRepository innerRepository,
+        IWalletCacheService walletCacheService) : IWalletRepository
     {
-        private readonly IWalletRepository _innerRepository;
-        private readonly IWalletCacheService _walletCacheService;
-
-        public CachedWalletRepository(
-            IWalletRepository innerRepository,
-            IWalletCacheService walletCacheService)
-        {
-            _innerRepository = innerRepository;
-            _walletCacheService = walletCacheService;
-        }
+        private readonly IWalletRepository _innerRepository = innerRepository;
+        private readonly IWalletCacheService _walletCacheService = walletCacheService;
 
         public Task AddAsync(Wallet wallet, CancellationToken cancellationToken = default)
             => _innerRepository.AddAsync(wallet, cancellationToken);
@@ -37,7 +31,7 @@ namespace PayFlow.Infrastructure.Persistence.Repositories
             return wallet is not null ? wallet : null;
         }
 
-        public Task<Wallet?> GetByIdAsync(Guid walletId, CancellationToken cancellationToken = default) 
+        public Task<Wallet?> GetByIdAsync(Guid walletId, CancellationToken cancellationToken = default)
             => _innerRepository.GetByIdAsync(walletId, cancellationToken);
     }
 }

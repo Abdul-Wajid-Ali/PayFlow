@@ -1,21 +1,14 @@
 namespace PayFlow.Infrastructure.Messaging
 {
-    public class OutboxWorker : BackgroundService
+    public class OutboxWorker(ILogger<OutboxWorker> logger, IServiceScopeFactory scopeFactory, IDateTimeProvider dateTimeProvider) : BackgroundService
     {
         private const int MaxRetries = 3;
         private const int BatchSize = 20;
         private const int PollingIntervalSeconds = 10;
 
-        private readonly ILogger<OutboxWorker> _logger;
-        private readonly IServiceScopeFactory _scopeFactory;
-        private readonly IDateTimeProvider _dateTimeProvider;
-
-        public OutboxWorker(ILogger<OutboxWorker> logger, IServiceScopeFactory scopeFactory, IDateTimeProvider dateTimeProvider )
-        {
-            _logger = logger;
-            _scopeFactory = scopeFactory;
-            _dateTimeProvider = dateTimeProvider;
-        }
+        private readonly ILogger<OutboxWorker> _logger = logger;
+        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+        private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

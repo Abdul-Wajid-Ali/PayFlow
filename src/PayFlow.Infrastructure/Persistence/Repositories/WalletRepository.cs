@@ -1,11 +1,8 @@
 namespace PayFlow.Infrastructure.Persistence.Repositories
 {
-    public class WalletRepository : IWalletRepository
+    public class WalletRepository(PayFlowDbContext dbContext) : IWalletRepository
     {
-        private readonly PayFlowDbContext _dbContext;
-
-        public WalletRepository(PayFlowDbContext dbContext)
-            => _dbContext = dbContext;
+        private readonly PayFlowDbContext _dbContext = dbContext;
 
         public async Task AddAsync(Wallet wallet, CancellationToken cancellationToken = default)
          => await _dbContext.Wallets.AddAsync(wallet, cancellationToken);

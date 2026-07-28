@@ -1,11 +1,8 @@
 namespace PayFlow.Infrastructure.Messaging
 {
-    public class RabbitMqPublisher : IEventPublisher
+    public class RabbitMqPublisher(RabbitMqConnectionManager manager) : IEventPublisher
     {
-        private readonly IRabbitMqConnectionProvider _manager;
-
-        public RabbitMqPublisher(RabbitMqConnectionManager manager)
-        => _manager = manager;
+        private readonly IRabbitMqConnectionProvider _manager = manager;
 
         public async Task PublishAsync(string routingKey, string payload, CancellationToken cancellationToken = default)
         {

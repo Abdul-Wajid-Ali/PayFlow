@@ -1,18 +1,12 @@
 namespace PayFlow.Infrastructure.Services
 {
-    public class WalletCacheService : IWalletCacheService
+    public class WalletCacheService(ILogger<WalletCacheService> logger, IDistributedCache distributedCache) : IWalletCacheService
     {
-        private readonly ILogger<WalletCacheService> _logger;
-        private readonly IDistributedCache _distributedCache;
+        private readonly ILogger<WalletCacheService> _logger = logger;
+        private readonly IDistributedCache _distributedCache = distributedCache;
 
         private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
         private static readonly TimeSpan BalanceCacheTtl = TimeSpan.FromSeconds(120 + Random.Shared.Next(0, 15));
-
-        public WalletCacheService(ILogger<WalletCacheService> logger, IDistributedCache distributedCache)
-        {
-            _logger = logger;
-            _distributedCache = distributedCache;
-        }
 
         public async Task SetBalanceAsync(WalletCacheResult result, Guid userId, CancellationToken cancellationToken = default)
         {

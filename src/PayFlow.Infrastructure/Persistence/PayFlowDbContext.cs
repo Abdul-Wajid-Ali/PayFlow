@@ -1,11 +1,7 @@
 namespace PayFlow.Infrastructure.Persistence
 {
-    public class PayFlowDbContext : DbContext
+    public class PayFlowDbContext(DbContextOptions<PayFlowDbContext> options) : DbContext(options)
     {
-        public PayFlowDbContext(DbContextOptions<PayFlowDbContext> options) : base(options)
-        {
-        }
-
         public DbSet<User> Users { get; set; }
 
         public DbSet<Wallet> Wallets { get; set; }

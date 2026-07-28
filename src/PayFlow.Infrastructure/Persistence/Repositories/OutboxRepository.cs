@@ -1,11 +1,8 @@
 namespace PayFlow.Infrastructure.Persistence.Repositories
 {
-    public class OutboxRepository : IOutboxRepository
+    public class OutboxRepository(PayFlowDbContext dbContext) : IOutboxRepository
     {
-        private readonly PayFlowDbContext _dbContext;
-
-        public OutboxRepository(PayFlowDbContext dbContext)
-            => _dbContext = dbContext;
+        private readonly PayFlowDbContext _dbContext = dbContext;
 
         public async Task AddAsync(OutboxMessage message, CancellationToken cancellationToken = default)
          => await _dbContext.OutboxMessages.AddAsync(message, cancellationToken);

@@ -1,25 +1,17 @@
 namespace PayFlow.Infrastructure.Messaging.Consumers
 {
-    public class TransferProcessingConsumer : BackgroundService
+    public class TransferProcessingConsumer(
+        IServiceScopeFactory scopeFactory,
+        ILogger<TransferProcessingConsumer> logger,
+        IRabbitMqConnectionProvider connectionProvider,
+        IDateTimeProvider dateTimeProvider) : BackgroundService
     {
         private IChannel? _channel;
 
-        private readonly IServiceScopeFactory _scopeFactory;
-        private readonly ILogger<TransferProcessingConsumer> _logger;
-        private readonly IRabbitMqConnectionProvider _connectionProvider;
-        private readonly IDateTimeProvider _dateTimeProvider;
-
-        public TransferProcessingConsumer(
-            IServiceScopeFactory scopeFactory,
-            ILogger<TransferProcessingConsumer> logger,
-            IRabbitMqConnectionProvider connectionProvider,
-            IDateTimeProvider dateTimeProvider)
-        {
-            _logger = logger;
-            _scopeFactory = scopeFactory;
-            _connectionProvider = connectionProvider;
-            _dateTimeProvider = dateTimeProvider;
-        }
+        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+        private readonly ILogger<TransferProcessingConsumer> _logger = logger;
+        private readonly IRabbitMqConnectionProvider _connectionProvider = connectionProvider;
+        private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

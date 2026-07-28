@@ -1,22 +1,15 @@
 namespace PayFlow.Infrastructure.Messaging.Consumers
 {
-    public class CacheUpdateConsumer : BackgroundService
+    public class CacheUpdateConsumer(
+        IWalletCacheService cacheService,
+        ILogger<CacheUpdateConsumer> logger,
+        RabbitMqConnectionManager connectionManager) : BackgroundService
     {
         private IChannel? _channel;
 
-        private readonly ILogger _logger;
-        private readonly IWalletCacheService _cacheService;
-        private readonly IRabbitMqConnectionProvider _connectionProvider;
-
-        public CacheUpdateConsumer(
-            IWalletCacheService cacheService,
-            ILogger<CacheUpdateConsumer> logger,
-            RabbitMqConnectionManager connectionManager)
-        {
-            _logger = logger;
-            _cacheService = cacheService;
-            _connectionProvider = connectionManager;
-        }
+        private readonly ILogger _logger = logger;
+        private readonly IWalletCacheService _cacheService = cacheService;
+        private readonly IRabbitMqConnectionProvider _connectionProvider = connectionManager;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

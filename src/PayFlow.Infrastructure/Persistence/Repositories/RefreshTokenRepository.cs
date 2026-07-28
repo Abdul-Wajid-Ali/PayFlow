@@ -1,12 +1,8 @@
 namespace PayFlow.Infrastructure.Persistence.Repositories
 {
-    public class RefreshTokenRepository : IRefreshTokenRepository
+    public class RefreshTokenRepository(PayFlowDbContext dbContext) : IRefreshTokenRepository
     {
-        private readonly PayFlowDbContext _dbContext;
-
-
-        public RefreshTokenRepository(PayFlowDbContext dbContext)
-            => _dbContext = dbContext;
+        private readonly PayFlowDbContext _dbContext = dbContext;
 
         public async Task AddAsync(RefreshToken refreshToken, CancellationToken cancellationToken = default)
             => await _dbContext.AddAsync(refreshToken, cancellationToken);
