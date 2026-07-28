@@ -1,20 +1,13 @@
 namespace PayFlow.Application.Features.Transfers.Queries
 {
-    public class GetTransactionsQueryHandler : IQueryHandler<GetTransactionsQuery, PagedResult<TransactionResponse>>
+    public class GetTransactionsQueryHandler(
+        IWalletRepository walletRepository,
+        ITransactionRepository transactionRepository,
+        ILogger<GetTransactionsQueryHandler> logger) : IQueryHandler<GetTransactionsQuery, PagedResult<TransactionResponse>>
     {
-        private readonly IWalletRepository _walletRepository;
-        private readonly ITransactionRepository _transactionRepository;
-        private readonly ILogger<GetTransactionsQueryHandler> _logger;
-
-        public GetTransactionsQueryHandler(
-            IWalletRepository walletRepository,
-            ITransactionRepository transactionRepository,
-            ILogger<GetTransactionsQueryHandler> logger)
-        {
-            _walletRepository = walletRepository;
-            _transactionRepository = transactionRepository;
-            _logger = logger;
-        }
+        private readonly IWalletRepository _walletRepository = walletRepository;
+        private readonly ITransactionRepository _transactionRepository = transactionRepository;
+        private readonly ILogger<GetTransactionsQueryHandler> _logger = logger;
 
         public async Task<PagedResult<TransactionResponse>> Handle(GetTransactionsQuery query, CancellationToken cancellationToken = default)
         {

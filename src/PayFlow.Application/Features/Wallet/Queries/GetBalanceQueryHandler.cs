@@ -1,17 +1,11 @@
 namespace PayFlow.Application.Features.Wallet.Queries
 {
-    public class GetBalanceQueryHandler : IQueryHandler<GetBalanceQuery, WalletBalanceResponse>
+    public class GetBalanceQueryHandler(
+        IWalletRepository walletRepository,
+        ILogger<GetBalanceQueryHandler> logger) : IQueryHandler<GetBalanceQuery, WalletBalanceResponse>
     {
-        private readonly IWalletRepository _walletRepository;
-        private readonly ILogger<GetBalanceQueryHandler> _logger;
-
-        public GetBalanceQueryHandler(
-            IWalletRepository walletRepository,
-            ILogger<GetBalanceQueryHandler> logger)
-        {
-            _walletRepository = walletRepository;
-            _logger = logger;
-        }
+        private readonly IWalletRepository _walletRepository = walletRepository;
+        private readonly ILogger<GetBalanceQueryHandler> _logger = logger;
 
         public async Task<WalletBalanceResponse> Handle(GetBalanceQuery query, CancellationToken cancellationToken)
         {

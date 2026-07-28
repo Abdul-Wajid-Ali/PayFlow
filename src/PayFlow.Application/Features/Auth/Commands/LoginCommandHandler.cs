@@ -1,32 +1,21 @@
 namespace PayFlow.Application.Features.Auth.Commands
 {
-    public class LoginCommandHandler : ICommandHandler<LoginCommand, LoginResponse>
+    public class LoginCommandHandler(
+        IJwtService jwtService,
+        IPasswordService passwordService,
+        IUserRepository userRepository,
+        IDateTimeProvider dateProvider,
+        ILogger<LoginCommandHandler> logger,
+        IRefreshTokenRepository refreshTokenRepository,
+        IUnitOfWork unitOfWork) : ICommandHandler<LoginCommand, LoginResponse>
     {
-        private readonly IJwtService _jwtService;
-        private readonly IPasswordService _passwordService;
-        private readonly IUserRepository _userRepository;
-        private readonly IDateTimeProvider _dateProvider;
-        private readonly ILogger<LoginCommandHandler> _logger;
-        private readonly IRefreshTokenRepository _refreshTokenRepository;
-        private readonly IUnitOfWork _unitOfWork;
-
-        public LoginCommandHandler(
-            IJwtService jwtService,
-            IPasswordService passwordService,
-            IUserRepository userRepository,
-            IDateTimeProvider dateProvider,
-            ILogger<LoginCommandHandler> logger,
-            IRefreshTokenRepository refreshTokenRepository,
-            IUnitOfWork unitOfWork)
-        {
-            _jwtService = jwtService;
-            _passwordService = passwordService;
-            _userRepository = userRepository;
-            _dateProvider = dateProvider;
-            _logger = logger;
-            _refreshTokenRepository = refreshTokenRepository;
-            _unitOfWork = unitOfWork;
-        }
+        private readonly IJwtService _jwtService = jwtService;
+        private readonly IPasswordService _passwordService = passwordService;
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly IDateTimeProvider _dateProvider = dateProvider;
+        private readonly ILogger<LoginCommandHandler> _logger = logger;
+        private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
         public async Task<LoginResponse> Handle(LoginCommand command, CancellationToken cancellationToken)
         {

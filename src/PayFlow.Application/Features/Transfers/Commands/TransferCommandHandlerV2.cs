@@ -1,30 +1,20 @@
 namespace PayFlow.Application.Features.Transfers.Commands
 {
-    public class TransferCommandHandlerV2 : ICommandHandler<TransferCommandV2, TransferAcceptedResponse>
+    public class TransferCommandHandlerV2(
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        IWalletRepository walletRepository,
+        ITransactionRepository transactionRepository,
+        ILogger<TransferCommandHandlerV2> logger,
+        ICurrentUserService currentUserService,
+        IOutboxRepository outboxRepository) : ICommandHandler<TransferCommandV2, TransferAcceptedResponse>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IDateTimeProvider _dateTimeProvider;
-        private readonly IWalletRepository _walletRepository;
-        private readonly ITransactionRepository _transactionRepository;
-        private readonly ILogger<TransferCommandHandlerV2> _logger;
-        private readonly IOutboxRepository _outboxRepository;
-
-        public TransferCommandHandlerV2(
-            IUnitOfWork unitOfWork,
-            IDateTimeProvider dateTimeProvider,
-            IWalletRepository walletRepository,
-            ITransactionRepository transactionRepository,
-            ILogger<TransferCommandHandlerV2> logger,
-            ICurrentUserService currentUserService,
-            IOutboxRepository outboxRepository)
-        {
-            _unitOfWork = unitOfWork;
-            _dateTimeProvider = dateTimeProvider;
-            _walletRepository = walletRepository;
-            _transactionRepository = transactionRepository;
-            _logger = logger;
-            _outboxRepository = outboxRepository;
-        }
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+        private readonly IWalletRepository _walletRepository = walletRepository;
+        private readonly ITransactionRepository _transactionRepository = transactionRepository;
+        private readonly ILogger<TransferCommandHandlerV2> _logger = logger;
+        private readonly IOutboxRepository _outboxRepository = outboxRepository;
 
         public async Task<TransferAcceptedResponse> Handle(TransferCommandV2 command, CancellationToken cancellationToken)
         {

@@ -1,30 +1,20 @@
 namespace PayFlow.Application.Features.Transfers.Commands
 {
-    public class TransferCommandHandler : ICommandHandler<TransferCommand, TransferResponse>
+    public class TransferCommandHandler(
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        IWalletRepository walletRepository,
+        ITransactionRepository transactionRepository,
+        IOutboxRepository outboxRepository,
+        ILogger<TransferCommandHandler> logger) : ICommandHandler<TransferCommand, TransferResponse>
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IDateTimeProvider _dateTimeProvider;
-        private readonly IWalletRepository _walletRepository;
-        private readonly ITransactionRepository _transactionRepository;
-        private readonly IOutboxRepository _outboxRepository;
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+        private readonly IWalletRepository _walletRepository = walletRepository;
+        private readonly ITransactionRepository _transactionRepository = transactionRepository;
+        private readonly IOutboxRepository _outboxRepository = outboxRepository;
 
-        private readonly ILogger<TransferCommandHandler> _logger;
-
-        public TransferCommandHandler(
-            IUnitOfWork unitOfWork,
-            IDateTimeProvider dateTimeProvider,
-            IWalletRepository walletRepository,
-            ITransactionRepository transactionRepository,
-            IOutboxRepository outboxRepository,
-            ILogger<TransferCommandHandler> logger)
-        {
-            _unitOfWork = unitOfWork;
-            _dateTimeProvider = dateTimeProvider;
-            _walletRepository = walletRepository;
-            _transactionRepository = transactionRepository;
-            _outboxRepository = outboxRepository;
-            _logger = logger;
-        }
+        private readonly ILogger<TransferCommandHandler> _logger = logger;
 
         public async Task<TransferResponse> Handle(TransferCommand command, CancellationToken cancellationToken)
         {
@@ -133,7 +123,7 @@ namespace PayFlow.Application.Features.Transfers.Commands
                     eventType: nameof(WalletBalanceChangedEvent),
                     payload: JsonSerializer.Serialize(senderBalanceEvent),
                     routingKey: DomainEvents.WalletBalanceChanged,
-                    createdAt: _dateTimeProvider.UtcNow), 
+                    createdAt: _dateTimeProvider.UtcNow),
                 cancellationToken);
 
             // 9: Credit amount to receiver wallet
@@ -153,7 +143,7 @@ namespace PayFlow.Application.Features.Transfers.Commands
                     eventType: nameof(WalletBalanceChangedEvent),
                     payload: JsonSerializer.Serialize(receiverBalanceEvent),
                     routingKey: DomainEvents.WalletBalanceChanged,
-                    createdAt: _dateTimeProvider.UtcNow), 
+                    createdAt: _dateTimeProvider.UtcNow),
                 cancellationToken);
 
             // 10: Mark transaction as completed

@@ -1,9 +1,6 @@
 ﻿namespace PayFlow.Application.Common.Exceptions
 {
-    public class IdempotencyConflictException : Exception
+    public class IdempotencyConflictException(string message) : Exception(message)
     {
-        public IdempotencyConflictException(string message) : base(message)
-        {
-        }
     }
 }

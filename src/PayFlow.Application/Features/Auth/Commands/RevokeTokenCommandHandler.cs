@@ -1,26 +1,17 @@
 namespace PayFlow.Application.Features.Auth.Commands
 {
-    public class RevokeTokenCommandHandler : ICommandHandler<RevokeTokenCommand, bool>
+    public class RevokeTokenCommandHandler(
+        IJwtService jwtService,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        IRefreshTokenRepository refreshTokenRepository,
+        ILogger<RevokeTokenCommandHandler> logger) : ICommandHandler<RevokeTokenCommand, bool>
     {
-        private readonly IJwtService _jwtService;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IDateTimeProvider _dateTimeProvider;
-        private readonly ILogger<RevokeTokenCommandHandler> _logger;
-        private readonly IRefreshTokenRepository _refreshTokenRepository;
-
-        public RevokeTokenCommandHandler(
-            IJwtService jwtService,
-            IUnitOfWork unitOfWork,
-            IDateTimeProvider dateTimeProvider,
-            IRefreshTokenRepository refreshTokenRepository,
-            ILogger<RevokeTokenCommandHandler> logger)
-        {
-            _jwtService = jwtService;
-            _unitOfWork = unitOfWork;
-            _dateTimeProvider = dateTimeProvider;
-            _refreshTokenRepository = refreshTokenRepository;
-            _logger = logger;
-        }
+        private readonly IJwtService _jwtService = jwtService;
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+        private readonly ILogger<RevokeTokenCommandHandler> _logger = logger;
+        private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
 
         public async Task<bool> Handle(RevokeTokenCommand command, CancellationToken cancellationToken)
         {

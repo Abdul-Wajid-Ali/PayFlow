@@ -1,29 +1,19 @@
 namespace PayFlow.Application.Features.Auth.Commands
 {
-    public class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand, RefreshTokenResponse>
+    public class RefreshTokenCommandHandler(
+        IUserRepository userRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeProvider dateTimeProvider,
+        IRefreshTokenRepository refreshTokenRepository,
+        ILogger<RefreshTokenCommandHandler> logger,
+        IJwtService jwtService) : ICommandHandler<RefreshTokenCommand, RefreshTokenResponse>
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IDateTimeProvider _dateTimeProvider;
-        private readonly IRefreshTokenRepository _refreshTokenRepository;
-        private readonly ILogger<RefreshTokenCommandHandler> _logger;
-        private readonly IJwtService _jwtService;
-
-        public RefreshTokenCommandHandler(
-            IUserRepository userRepository,
-            IUnitOfWork unitOfWork,
-            IDateTimeProvider dateTimeProvider,
-            IRefreshTokenRepository refreshTokenRepository,
-            ILogger<RefreshTokenCommandHandler> logger,
-            IJwtService jwtService)
-        {
-            _userRepository = userRepository;
-            _unitOfWork = unitOfWork;
-            _dateTimeProvider = dateTimeProvider;
-            _refreshTokenRepository = refreshTokenRepository;
-            _logger = logger;
-            _jwtService = jwtService;
-        }
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+        private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
+        private readonly ILogger<RefreshTokenCommandHandler> _logger = logger;
+        private readonly IJwtService _jwtService = jwtService;
 
         public async Task<RefreshTokenResponse> Handle(RefreshTokenCommand command, CancellationToken cancellationToken)
         {

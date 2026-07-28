@@ -1,33 +1,21 @@
 namespace PayFlow.Application.Features.Auth.Commands
 {
-    public class RegisterCommandHandler : ICommandHandler<RegisterCommand, RegisterResponse>
+    public class RegisterCommandHandler(
+        IUserRepository userRepository,
+        IWalletRepository walletRepository,
+        IOutboxRepository outboxRepository,
+        IUnitOfWork unitOfWork,
+        IPasswordService passwordService,
+        IDateTimeProvider dateTimeProvider,
+        ILogger<RegisterCommandHandler> logger) : ICommandHandler<RegisterCommand, RegisterResponse>
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IWalletRepository _walletRepository;
-        private readonly IOutboxRepository _outboxRepository;
-        private readonly IUnitOfWork _unitOfWork;
-
-        private readonly IPasswordService _passwordService;
-        private readonly IDateTimeProvider _dateTimeProvider;
-        private readonly ILogger<RegisterCommandHandler> _logger;
-
-        public RegisterCommandHandler(
-            IUserRepository userRepository,
-            IWalletRepository walletRepository,
-            IOutboxRepository outboxRepository,
-            IUnitOfWork unitOfWork,
-            IPasswordService passwordService,
-            IDateTimeProvider dateTimeProvider,
-            ILogger<RegisterCommandHandler> logger)
-        {
-            _userRepository = userRepository;
-            _walletRepository = walletRepository;
-            _outboxRepository = outboxRepository;
-            _unitOfWork = unitOfWork;
-            _passwordService = passwordService;
-            _dateTimeProvider = dateTimeProvider;
-            _logger = logger;
-        }
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly IWalletRepository _walletRepository = walletRepository;
+        private readonly IOutboxRepository _outboxRepository = outboxRepository;
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IPasswordService _passwordService = passwordService;
+        private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+        private readonly ILogger<RegisterCommandHandler> _logger = logger;
 
         public async Task<RegisterResponse> Handle(
             RegisterCommand command,
