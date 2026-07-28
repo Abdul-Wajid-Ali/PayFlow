@@ -364,3 +364,7 @@ FodyWeavers.xsd
 
 # Docker environment secrets
 .env
+
+# Local secrets in appsettings (contains real dev credentials)
+appsettings.json
+appsettings.Development.json
