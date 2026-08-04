@@ -1,22 +1,22 @@
 namespace PayFlow.Application.Features.Transfers.Commands
 {
-    public class TransferCommandHandlerV2(
+    public class TransferAsyncCommandHandler(
         IUnitOfWork unitOfWork,
         IDateTimeProvider dateTimeProvider,
         IWalletRepository walletRepository,
         ITransactionRepository transactionRepository,
-        ILogger<TransferCommandHandlerV2> logger,
+        ILogger<TransferAsyncCommandHandler> logger,
         ICurrentUserService currentUserService,
-        IOutboxRepository outboxRepository) : ICommandHandler<TransferCommandV2, TransferAcceptedResponse>
+        IOutboxRepository outboxRepository) : ICommandHandler<TransferAsyncCommand, TransferAcceptedResponse>
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
         private readonly IWalletRepository _walletRepository = walletRepository;
         private readonly ITransactionRepository _transactionRepository = transactionRepository;
-        private readonly ILogger<TransferCommandHandlerV2> _logger = logger;
+        private readonly ILogger<TransferAsyncCommandHandler> _logger = logger;
         private readonly IOutboxRepository _outboxRepository = outboxRepository;
 
-        public async Task<TransferAcceptedResponse> Handle(TransferCommandV2 command, CancellationToken cancellationToken)
+        public async Task<TransferAcceptedResponse> Handle(TransferAsyncCommand command, CancellationToken cancellationToken)
         {
             _logger.LogInformation(
                 "Transfer initiated from {SenderUserId} to {ReceiverUserId} for {Amount} {Currency} with IdempotencyKey {IdempotencyKey}",

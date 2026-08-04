@@ -1,6 +1,6 @@
 namespace PayFlow.Application.Features.Transfers.Commands
 {
-    public record TransferCommandV2(
+    public record TransferAsyncCommand(
         Guid SenderUserId,
         Guid ReceiverUserId,
         decimal Amount,

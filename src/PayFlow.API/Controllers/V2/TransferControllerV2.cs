@@ -31,8 +31,8 @@
                     Status = StatusCodes.Status400BadRequest
                 });
 
-            // Create TransferCommand from the request
-            var command = new TransferCommandV2(
+            // Create TransferAsyncCommand from the request
+            var command = new TransferAsyncCommand(
                 SenderUserId: _currentUser.UserId,
                 ReceiverUserId: request.ReceiverUserId,
                 Amount: request.Amount,

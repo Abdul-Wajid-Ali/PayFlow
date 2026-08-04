@@ -1,6 +1,9 @@
 namespace PayFlow.Infrastructure.Messaging
 {
-    public class OutboxWorker(ILogger<OutboxWorker> logger, IServiceScopeFactory scopeFactory, IDateTimeProvider dateTimeProvider) : BackgroundService
+    public class OutboxWorker(
+        ILogger<OutboxWorker> logger,
+        IServiceScopeFactory scopeFactory,
+        IDateTimeProvider dateTimeProvider) : BackgroundService
     {
         private const int MaxRetries = 3;
         private const int BatchSize = 20;
@@ -69,9 +72,8 @@ namespace PayFlow.Infrastructure.Messaging
 
                     // 4d: Log a warning if the message will be retried, or an error if it has been dead-lettered after exceeding max retries
                     if (item.DeadLetteredAt.HasValue)
-                        _logger.LogError(
-                        "Outbox message dead-lettered after {MaxRetries} retries. Id: {Id}, EventType: {EventType}, LastError: {Error}",
-                        MaxRetries, item.Id, item.EventType, item.LastError);
+                        _logger.LogError(ex, "Outbox message dead-lettered after {MaxRetries} retries. Id: {Id}, EventType: {EventType}, LastError: {Error}",
+                            MaxRetries, item.Id, item.EventType, item.LastError);
                     else
                         _logger.LogWarning(
                             "Outbox message publish failed. Id: {Id}, RetryCount: {RetryCount}, NextRetryAt: {NextRetryAt}, Error: {Error}",

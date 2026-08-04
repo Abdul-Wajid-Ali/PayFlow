@@ -1,6 +1,8 @@
 namespace PayFlow.Infrastructure.Messaging.Consumers
 {
-    public class NotificationConsumer(ILogger<NotificationConsumer> logger, RabbitMqConnectionManager connectionManager) : BackgroundService
+    public class NotificationConsumer(
+        ILogger<NotificationConsumer> logger, 
+        RabbitMqConnectionManager connectionManager) : BackgroundService
     {
         private IChannel? _channel;
 

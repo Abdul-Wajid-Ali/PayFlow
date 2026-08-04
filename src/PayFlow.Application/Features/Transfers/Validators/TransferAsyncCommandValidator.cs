@@ -1,8 +1,8 @@
 namespace PayFlow.Application.Features.Transfers.Validators
 {
-    public class TransferCommandValidatorV2 : AbstractValidator<TransferCommandV2>
+    public class TransferAsyncCommandValidator : AbstractValidator<TransferAsyncCommand>
     {
-        public TransferCommandValidatorV2()
+        public TransferAsyncCommandValidator()
         {
             //1: The receiver user ID must not be empty.
             RuleFor(x => x.ReceiverUserId)
